@@ -69,7 +69,10 @@ ui <- fluidPage(
     tabPanel("Taxonomy",
              # Code to display the taxonomic tree.
              # Abundance filter slider if possible.
-             value = "taxa"),
+             value = "taxa",
+             plotOutput('taxa_tree', 
+                        height=1000)
+             ),
     
     tabPanel("Functional Anotation",
              # Code to display the graphics.
@@ -124,6 +127,19 @@ server <- function(input, output) {
   })
   
   # Taxonomy tab
+  output$taxa_tree <- renderPlot({
+    req(input$taxon)
+    
+    df <- read.table(input$file$datapath,
+                     header = input$header,
+                     sep = input$sep)
+    
+    taxa_data <- extract_tax_data(df$V1,
+                                  key = c("class"),
+                                  regex="(.*)",
+                                  class_sep = ";")
+    heat_tree(taxa_data, node_label=taxon_names, node_size=n_obs, node_color=n_obs)
+  })
   
 }
 
