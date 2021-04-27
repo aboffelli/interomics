@@ -2,6 +2,7 @@ library(shiny)
 library(metacoder)
 
 ui <- fluidPage(
+  # Application title in the top of the page
   fluidRow(column(
     6, offset = 3,
     wellPanel(
@@ -11,12 +12,15 @@ ui <- fluidPage(
     )
   )),
   
+  
   tabsetPanel(
+    id = "tabset",
     tabPanel(
       "Input upload",
       value = "upload",
       sidebarLayout(
         sidebarPanel(
+          # Input box
           fileInput(
             "file",
             "Choose File",
@@ -37,67 +41,90 @@ ui <- fluidPage(
             ),
             selected = "\t"
           ),
+          # slider for number of rows to display
           sliderInput(
             "rownum",
             "Number of rows to display",
             value = 10,
             min = 1,
             max = 50
-          )
-        ),
-        mainPanel(fluidRow(
-          column(
-            12,
-            div(style = "height:410px; overflow-y:scroll",
-                # Display the table
-                tableOutput("contents"))
           ),
-          # Button(s) to continue with the selected table.
-          column(3, style = "height:25px",
-                 actionButton("continue", "Continue"))
-        ))
+          # display the whole table
+          checkboxInput("all", "Display all", F),
+          
+          # Button to Taxonomy tab.
+          actionButton("taxon", "Taxonomic Tree"),
+          # Button to Annotation tab.
+          actionButton("plots", "Annotation"),
+        ),
+        mainPanel(fluidRow(column(
+          12,
+          div(style = "height:450px; overflow-y:scroll",
+              # Display the table
+              tableOutput("contents"))
+        )))
       )
     ),
     
-    tabPanel("Taxonomy"
+    tabPanel("Taxonomy",
              # Code to display the taxonomic tree.
              # Abundance filter slider if possible.
-             
-             
-             ),
-             
-             tabPanel("Functional Anotation"
-                      # Code to display the graphics.
-                      # Zoom and click
-                      )
-             ),
-             
-             hr(),
-             p(strong("Visit "),
-               strong(
-                 a(href = "https://github.com/aboffelli/interomics",
-                   "Interomics GitHub")
-               ),
-               strong("for more information."))
-    )
+             value = "taxa"),
     
+    tabPanel("Functional Anotation",
+             # Code to display the graphics.
+             # Zoom and click
+             value = "funct")
+  ),
+  hr(),
+  p(strong("Visit "),
+    strong(
+      a(href = "https://github.com/aboffelli/interomics",
+        "Interomics GitHub")
+    ),
+    strong("for more information."))
+)
+
 server <- function(input, output) {
-      # Upload tab
-      
-      # Slidebar will react to change
-      headnum <- eventReactive(input$rownum, {
-        input$rownum
-      })
-      output$contents <- renderTable({
-        req(input$file)
-        
-        df <- read.table(input$file$datapath,
-                         header = input$header,
-                         sep = input$sep)
-        # display the table based on the slider
-        head(df, n = headnum())
-      })
-      
-    }
+  # Upload tab
+  
+  # Slidebar will react to change
+  headnum <- eventReactive(input$rownum, {
+    input$rownum
+  })
+  output$contents <- renderTable({
+    req(input$file)
     
-    shinyApp(ui = ui, server = server)
+    df <- read.table(input$file$datapath,
+                     header = input$header,
+                     sep = input$sep)
+    # display the table based on the slider
+    if (!input$all) {
+      head(df, n = headnum())
+    }
+    else
+      df
+    
+  })
+  
+  # Button Taxonomic tree change to Taxonomy tab
+  observeEvent(input$taxon, {
+    req(input$file)
+    updateTabsetPanel(session = getDefaultReactiveDomain(),
+                      "tabset",
+                      selected = "taxa")
+  })
+  
+  # Button Annotation change to Plots tab
+  observeEvent(input$plots, {
+    req(input$file)
+    updateTabsetPanel(session = getDefaultReactiveDomain(),
+                      "tabset",
+                      selected = "funct")
+  })
+  
+  # Taxonomy tab
+  
+}
+
+shinyApp(ui = ui, server = server)
