@@ -16,7 +16,7 @@ ui <- fluidPage(
   tabsetPanel(
     id = "tabset",
     tabPanel(
-      "Input upload",
+      "File upload",
       value = "upload",
       sidebarLayout(
         sidebarPanel(
