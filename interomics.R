@@ -79,7 +79,9 @@ ui <- fluidPage(
              # Zoom and click
              value = "funct")
   ),
+  # print a line
   hr(),
+  # link to GitHub
   p(strong("Visit "),
     strong(
       a(href = "https://github.com/aboffelli/interomics",
@@ -95,6 +97,7 @@ server <- function(input, output) {
   headnum <- eventReactive(input$rownum, {
     input$rownum
   })
+  # uploaded table display
   output$contents <- renderTable({
     req(input$file)
     
@@ -127,17 +130,21 @@ server <- function(input, output) {
   })
   
   # Taxonomy tab
+  # Build the tax tree
   output$taxa_tree <- renderPlot({
+    # only works when clicking in "Taxonomic tree" Button
     req(input$taxon)
     
     df <- read.table(input$file$datapath,
                      header = input$header,
                      sep = input$sep)
     
+    # Only works if column with taxa is called V1 and separated by semicolon (TODO fix this)
     taxa_data <- extract_tax_data(df$V1,
                                   key = c("class"),
                                   regex="(.*)",
                                   class_sep = ";")
+    # Create the plot
     heat_tree(taxa_data, node_label=taxon_names, node_size=n_obs, node_color=n_obs)
   })
   
