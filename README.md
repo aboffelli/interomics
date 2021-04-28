@@ -36,5 +36,5 @@ You can select a file to upload in the "File Upload" tab, clicking in "Browse...
 
 The separator can be selected between: tab, comma, and semicolon. The "Header" checkbox interprets the first line of the file as the header when activated.
 
-The file content will be displayed on the side after being selected. A slide bar is provided to select the number of rows that are displayed. To display the whole file, select the "Display all"  checkbox.
+The file content will be displayed on the side after being selected. A slide bar is provided to select the number of rows that are displayed. To display the entire file, select the "Display all" checkbox.
 

@@ -70,8 +70,13 @@ ui <- fluidPage(
              # Code to display the taxonomic tree.
              # Abundance filter slider if possible.
              value = "taxa",
-             plotOutput('taxa_tree', 
-                        height=1000)
+             column(3, wellPanel(
+               varSelectInput("tree_col", "Select the column containing the taxonomic information: ", F)
+               # Include after (maybe)
+               # selectInput("tree_type", "Select the output type used: ", choices=c("Kaiju", "EggNOG"))
+             )),
+             plotOutput('taxa_tree',
+                        height=1300)
              ),
     
     tabPanel("Functional Anotation",
@@ -90,8 +95,13 @@ ui <- fluidPage(
     strong("for more information."))
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   # Upload tab
+  df <- reactive({
+    read.table(input$file$datapath,
+               header = input$header,
+               sep = input$sep)
+  })
   
   # Slidebar will react to change
   headnum <- eventReactive(input$rownum, {
@@ -101,30 +111,29 @@ server <- function(input, output) {
   output$contents <- renderTable({
     req(input$file)
     
-    df <- read.table(input$file$datapath,
-                     header = input$header,
-                     sep = input$sep)
     # display the table based on the slider
     if (!input$all) {
-      head(df, n = headnum())
+      head(df(), n = headnum())
     }
     else
-      df
+      df()
     
   })
   
   # Button Taxonomic tree change to Taxonomy tab
   observeEvent(input$taxon, {
     req(input$file)
-    updateTabsetPanel(session = getDefaultReactiveDomain(),
+    updateTabsetPanel(session,
                       "tabset",
                       selected = "taxa")
+    # Update the variable options
+    updateVarSelectInput(session, "tree_col", data=df(), selected=F)
   })
   
   # Button Annotation change to Plots tab
   observeEvent(input$plots, {
     req(input$file)
-    updateTabsetPanel(session = getDefaultReactiveDomain(),
+    updateTabsetPanel(session,
                       "tabset",
                       selected = "funct")
   })
@@ -133,14 +142,10 @@ server <- function(input, output) {
   # Build the tax tree
   output$taxa_tree <- renderPlot({
     # only works when clicking in "Taxonomic tree" Button
-    req(input$taxon)
-    
-    df <- read.table(input$file$datapath,
-                     header = input$header,
-                     sep = input$sep)
-    
-    # Only works if column with taxa is called V1 and separated by semicolon (TODO fix this)
-    taxa_data <- extract_tax_data(df$V1,
+    req(input$tree_col)
+    tree <- df()[[input$tree_col]]
+    # Only works if separated by semicolon (TODO fix this)
+    taxa_data <- extract_tax_data(tree,
                                   key = c("class"),
                                   regex="(.*)",
                                   class_sep = ";")
