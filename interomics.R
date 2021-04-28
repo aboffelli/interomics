@@ -71,7 +71,8 @@ ui <- fluidPage(
              # Abundance filter slider if possible.
              value = "taxa",
              column(3, wellPanel(
-               varSelectInput("tree_col", "Select the column containing the taxonomic information: ", F)
+               varSelectInput("tree_col", "Select the column containing the taxonomic information: ", F),
+               helpText("Requires table upload in the File Upload tab.")
                # Include after (maybe)
                # selectInput("tree_type", "Select the output type used: ", choices=c("Kaiju", "EggNOG"))
              )),
