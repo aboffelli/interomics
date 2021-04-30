@@ -55,7 +55,7 @@ ui <- fluidPage(
           # Button to Taxonomy tab.
           actionButton("taxon", "Taxonomic Tree"),
           # Button to Annotation tab.
-          actionButton("plots", "Annotation"),
+          actionButton("plots", "Graphics"),
         ),
         mainPanel(fluidRow(column(
           12,
@@ -80,7 +80,7 @@ ui <- fluidPage(
                         height=1300)
              ),
     
-    tabPanel("Functional Anotation",
+    tabPanel("Graphics",
              # Code to display the graphics.
              # Zoom and click
              value = "funct")
