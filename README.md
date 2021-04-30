@@ -4,7 +4,7 @@
 
 
 
-## Instalation
+## Installation
 
 The program is written in R, and uses the following versions:
 
