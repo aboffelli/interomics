@@ -6,26 +6,27 @@
 
 ## Installation
 
-The program is written in R, and uses the following versions:
+The program is written in R (4.0.3), and uses the following packages:
 
-- R 4.0.3
 - shiny 1.6.0
 - metacoder 0.3.4
+- phyloseq 1.34.0
+- plotly 4.9.3
+- ggplot2 3.3.3
+- BiocManager 1.30.12
 
-### Installing shiny
+### Installing packages
 
-To install the shiny package open the R console and use the command
+To install the necessary package open the R console and use the commands
 
 ```r
 install.packages("shiny")
-```
-
-### Installing metacoder
-
-To install the metacoder package open the R console and use the command
-
-```r
 install.packages("metacoder")
+install.packages("ggplot2")
+install.packages("plotly")
+install.packages("BiocManager")
+BiocManager::install("phyloseq")
+
 ```
 
 
