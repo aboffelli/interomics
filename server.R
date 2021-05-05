@@ -11,9 +11,9 @@ create_biplot <- function(taxa, otu, sample) {
     OTU <- otu_table(otu, taxa_are_rows=T)
     TAXA <- tax_table(taxa)
     SAMPLE <- sample_data(sample)
-    phylo <- phyloseq(OTU, SAMPLE)
+    phylo <- phyloseq(OTU, TAXA, SAMPLE)
     phylo.ord <- ordinate(phylo, "NMDS", "bray")
-    biplot <- plot_ordination(phylo, phylo.ord, type="biplot", color="Depth", shape="Ecotype", title="Biplot")
+    biplot <- plot_ordination(phylo, phylo.ord, type="split", color="Family", shape="Ecotype", title="Biplot")
     return(biplot)
 }
 
@@ -38,15 +38,16 @@ server <- function(input, output, session) {
         as.matrix(read.table(input$otu$datapath,
                              sep = input$sep,
                              row.names=1,
-                             header=input$header
-        ))
+                             header=input$header,
+                             check.names=F)
+        )
     })
     
     
     sample_df <- reactive({
         read.table(input$sample$datapath,
                    header = input$header,
-                   sep = input$sep, row.names=colnames(otu_df()))[2:4]
+                   sep = input$sep, row.names=1)
     })
     
     # Slidebar will react to change

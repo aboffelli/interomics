@@ -73,7 +73,7 @@ ui <- fluidPage(
                         mainPanel(fluidRow(
                             column(
                                 12,
-                                p(strong("OUT table")),
+                                p(strong("OTU table")),
                                 div(style = "height:200px; overflow-y:scroll",
                                     # Display the tables
                                     tableOutput("otu_table"))
