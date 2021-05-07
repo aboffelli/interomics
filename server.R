@@ -7,21 +7,29 @@ library(ggplot2)
 theme_set(theme_bw())
 
 # Function to create a biplot object using phyloseq
-create_biplot <- function(taxa, otu, sample) {
+create_phylo <- function(taxa, otu, sample) {
     OTU <- otu_table(otu, taxa_are_rows=T)
     TAXA <- tax_table(taxa)
     SAMPLE <- sample_data(sample)
     phylo <- phyloseq(OTU, TAXA, SAMPLE)
-    phylo.ord <- ordinate(phylo, "NMDS", "bray")
-    biplot <- plot_ordination(phylo, phylo.ord, type="split", color="Family", shape="Ecotype", title="Biplot")
+    return(phylo)
+}
+
+create_biplot <- function(phylo_object, fill, shape) {
+    phylo.ord <- ordinate(phylo_object, "NMDS", "bray")
+    biplot <- plot_ordination(phylo_object, phylo.ord, type="split", color=fill, shape=shape)
     return(biplot)
 }
 
-# Function to generate the taxonomic tree.
-taxa_tree <- function(taxa) {
-    
+create_heatmap <- function(phylo_object) {
+    heat_plot <- plot_heatmap(phylo_object)
+    return(heat_plot)
 }
 
+# Function to generate the taxonomic tree.
+create_taxa_tree <- function(taxa) {
+    
+}
 
 
 
@@ -42,7 +50,6 @@ server <- function(input, output, session) {
                              check.names=F)
         )
     })
-    
     
     sample_df <- reactive({
         read.table(input$sample$datapath,
@@ -84,8 +91,6 @@ server <- function(input, output, session) {
         else
             sample_df()
     }, rownames=T)
-        
-    
     
     # Button Taxonomic tree change to Taxonomy tab
     observeEvent(input$taxon, {
@@ -105,6 +110,14 @@ server <- function(input, output, session) {
         updateTabsetPanel(session,
                           "tabset",
                           selected = "graph")
+        x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
+        colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
+        updateVarSelectInput(session,
+                             "fill_var", 
+                             data = x, selected=F)
+        updateVarSelectInput(session,
+                             "shape_var", 
+                             data = x, selected=F)
     })
     
     # Taxonomy tab
@@ -112,17 +125,22 @@ server <- function(input, output, session) {
     output$taxa_tree <- renderPlot({
         # only works when clicking in "Taxonomic tree" Button
         req(input$tree_col)
-        
     })
     
     # Graphics tab
-    # Biplot outoput
+    # Biplot output
+    
     output$biplot <- renderPlotly({
         # only works when clicking in "Graphics" button
-        req(input$plots)
-        biplot <- create_biplot(taxa=taxa_df(), 
-                                otu=otu_df(),
-                                sample=sample_df())
-        ggplotly(biplot)
+        req(input$fill_var)
+        req(input$shape_var)
+        chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
+        phylo <- create_phylo(taxa=taxa_df(), 
+                              otu=otu_df(),
+                              sample=sample_df())
+        
+        biplot <- create_biplot(phylo, fill=chosen_var[1], shape=chosen_var[2]) +
+            scale_shape(solid=F)
+        ggplotly(biplot, tooltip=c(chosen_var[1], chosen_var[2], "NMDS1", "NMDS2"))
     })
 }
