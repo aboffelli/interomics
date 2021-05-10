@@ -108,6 +108,11 @@ ui <- fluidPage(
       # Code to display the taxonomic tree.
       # Abundance filter slider if possible.
       value = "taxa",
+      fluidRow(
+        column(2,
+               varSelectInput("sample_var", "Select the sample label", data=F),
+               helpText("Label that appears under each sample in the heatmap."))
+        ),
       navlistPanel(
         widths = c(2, 10),
         tabPanel("Heatmap",
@@ -123,11 +128,12 @@ ui <- fluidPage(
       # Code to display the graphics.
       value = "graph",
       fluidRow(
-        column(4,
-               splitLayout(
-                 varSelectInput("fill_var", "Select the color variable", data=F),
-                 varSelectInput('shape_var', "Select the shape variable", data=F))
-        )),
+        column(2,
+               varSelectInput("fill_var", "Select the color variable", data=F)),
+        column(2,
+               varSelectInput('shape_var', "Select the shape variable", data=F))
+        ),
+      helpText("The color and shape of the points will be based on the variables selected"),
       # Create a tab panel with different types of plots
       navlistPanel(
         widths = c(2, 10),

@@ -95,11 +95,13 @@ server <- function(input, output, session) {
     # Button Taxonomic tree change to Taxonomy tab
     observeEvent(input$taxon, {
         req(input$taxa)
+        req(input$otu)
+        req(input$sample)
         updateTabsetPanel(session,
                           "tabset",
                           selected = "taxa")
         # Update the variable options
-        updateVarSelectInput(session, "tree_col", data=taxa_df(), selected=F)
+        updateVarSelectInput(session, "sample_var", data=sample_df(), selected=F)
     })
     
     # Button Annotation change to Plots tab
@@ -122,9 +124,18 @@ server <- function(input, output, session) {
     
     # Taxonomy tab
     # Build the tax tree
-    output$taxa_tree <- renderPlot({
+    output$heat_plot <- renderPlotly({
         # only works when clicking in "Taxonomic tree" Button
-        req(input$tree_col)
+        req(input$sample_var)
+        
+        chosen_var <- toString(input$sample_var)
+        phylo <- create_phylo(taxa=taxa_df(), 
+                              otu=otu_df(),
+                              sample=sample_df())
+        
+        heat_plot <- plot_heatmap(phylo, sample.label=chosen_var)
+        ggplotly(heat_plot)
+        
     })
     
     # Graphics tab
