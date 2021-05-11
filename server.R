@@ -38,7 +38,7 @@ server <- function(input, output, session) {
     taxa_df <- reactive({
         as.matrix(read.table(input$taxa$datapath,
                              header = input$header,
-                             sep = input$sep, row.names=row.names(otu_df()))[,2:10])
+                             sep = input$sep, row.names=1)[,1:9])
         
     })
     
@@ -93,7 +93,7 @@ server <- function(input, output, session) {
     }, rownames=T)
     
     # Button Taxonomic tree change to Taxonomy tab
-    observeEvent(input$taxon, {
+    observeEvent(input$abundance, {
         req(input$taxa)
         req(input$otu)
         req(input$sample)
@@ -150,8 +150,14 @@ server <- function(input, output, session) {
                               otu=otu_df(),
                               sample=sample_df())
         
-        biplot <- create_biplot(phylo, fill=chosen_var[1], shape=chosen_var[2]) +
+        biplot <- create_biplot(phylo, 
+                                fill=chosen_var[1], 
+                                shape=chosen_var[2]) +
             scale_shape(solid=F)
-        ggplotly(biplot, tooltip=c(chosen_var[1], chosen_var[2], "NMDS1", "NMDS2"))
+        
+        ggplotly(biplot, tooltip=c(chosen_var[1], 
+                                   chosen_var[2], 
+                                   "NMDS1", 
+                                   "NMDS2"))
     })
 }

@@ -6,17 +6,17 @@ ui <- fluidPage(
   fluidRow(column(
     6, offset = 3,
     wellPanel(
-      h1(strong("Interomics"), align = "center", style = "color:firebrick; font-size: 100px"),
+      h1(strong("Interomics"), 
+         align = "center", 
+         style = "color:firebrick; font-size: 100px"),
+      
       h2("An interactive application for metagenomic data"),
-      align = 'center'
-    )
-  )),
-  
-  
+      align = 'center')
+    )),
+
   tabsetPanel(
     id = "tabset",
-    tabPanel(
-      "File upload",
+    tabPanel("File upload",
       value = "upload",
       sidebarLayout(
         sidebarPanel(
@@ -25,7 +25,8 @@ ui <- fluidPage(
             "otu",
             "Choose OTU table file",
             multiple = F,
-            accept = c("text/csv", ".csv", "text/comma-separated-values,text/plain")
+            accept = c("text/csv", ".csv", 
+                       "text/comma-separated-values,text/plain")
           ),
           
           # Taxonomic table input box
@@ -33,7 +34,8 @@ ui <- fluidPage(
             "taxa",
             "Choose Taxonomic table file",
             multiple = F,
-            accept = c("text/csv", ".csv", "text/comma-separated-values,text/plain")
+            accept = c("text/csv", ".csv", 
+                       "text/comma-separated-values,text/plain")
           ),
           
           # Sample table input box
@@ -41,7 +43,8 @@ ui <- fluidPage(
             "sample",
             "Choose Sample table file",
             multiple = F,
-            accept = c("text/csv", ".csv", "text/comma-separated-values,text/plain")
+            accept = c("text/csv", ".csv", 
+                       "text/comma-separated-values,text/plain")
           ),
           
           # check box for header
@@ -71,10 +74,12 @@ ui <- fluidPage(
           # display the whole table
           checkboxInput("all", "Display all", F),
           
-          # Button to Taxonomy tab.
-          actionButton("taxon", "Taxonomic Tree"),
+          checkboxInput("example", "Use an example dataset", F),
           
-          # Button to Annotation tab.
+          # Button to Abundance tab.
+          actionButton("abundance", "Abundance"),
+          
+          # Button to Graphics tab.
           actionButton("plots", "Graphics")
         ),
         mainPanel(fluidRow(
@@ -103,14 +108,15 @@ ui <- fluidPage(
       )
     ),
     
-    tabPanel(
-      "Taxonomy",
+    tabPanel("Abundance",
       # Code to display the taxonomic tree.
       # Abundance filter slider if possible.
       value = "taxa",
+      # Variable selection box
       fluidRow(
         column(2,
-               varSelectInput("sample_var", "Select the sample label", data=F),
+               varSelectInput("sample_var", 
+                              "Select the sample label", data=F),
                helpText("Label that appears under each sample in the heatmap."))
         ),
       navlistPanel(
@@ -120,18 +126,21 @@ ui <- fluidPage(
                    plotlyOutput("heat_plot",
                                 height = "750px")
                  )),
+        
         tabPanel("Taxonomic tree") 
       )),
     
-    tabPanel(
-      "Graphics",
+    tabPanel("Graphics",
       # Code to display the graphics.
       value = "graph",
+      # Variable selection boxes
       fluidRow(
         column(2,
-               varSelectInput("fill_var", "Select the color variable", data=F)),
+               varSelectInput("fill_var", 
+                              "Select the color variable", data=F)),
         column(2,
-               varSelectInput('shape_var', "Select the shape variable", data=F))
+               varSelectInput('shape_var', 
+                              "Select the shape variable", data=F))
         ),
       helpText("The color and shape of the points will be based on the variables selected"),
       # Create a tab panel with different types of plots
@@ -140,7 +149,7 @@ ui <- fluidPage(
         tabPanel("Biplot",
                  wellPanel(plotlyOutput("biplot",
                                         height = "750px"))),
-        tabPanel("Other stuff",
+        tabPanel("Alpha Diversity",
                  wellPanel())
       )
     )
