@@ -20,22 +20,25 @@ The program is written in R (4.0.3), and uses the following packages:
 To install the necessary package open the R console and use the commands
 
 ```r
-install.packages("shiny")
-install.packages("metacoder")
-install.packages("ggplot2")
-install.packages("plotly")
-install.packages("BiocManager")
-BiocManager::install("phyloseq")
-
+packages <- c("shiny", "metacoder", "ggplot2", "plotly", "BiocManager")
+for(package in packages) install.packages(package)
+BiocManager::install("phyloseq", ask=FALSE)
 ```
 
 
 
 ## File Upload
 
-You can select a file to upload in the "File Upload" tab, clicking in "Browse...". The accepted file types are: plain text (txt), comma separated (csv), tab delimited. 
+The files can be uploaded in the initial page (File Upload tab), where three files are required:
 
-The separator can be selected between: tab, comma, and semicolon. The "Header" checkbox interprets the first line of the file as the header when activated.
+- OTU counts for each sample. The first column must be the OTU name/number. The first row the sample names.
+- Taxonomic table for each OTU. The first column must be the OTU name/number. The first row the taxonomic levels.
+- Sample data. The first column must be sample names. The first row as a header.
 
-The file content will be displayed on the side after being selected. A slide bar is provided to select the number of rows that are displayed. To display the entire file, select the "Display all" checkbox.
+The accepted formats are: text (txt), comma-separated-values (csv). The type of separator can be defined in the File Upload page, the options are tab, comma, and semicolon. The "Header" checkbox interprets the first line of the file as the header when activated.
 
+Each file will be loaded in the right panel, where the number of rows displayed can be controlled with the slider in the left panel.
+
+It is possible to load an example dataset selecting the checkbox under the slider. When selected, the three tables will be displayed.
+
+When all tables are displayed correctly you can continue for the Abundance and Graphics tabs. 

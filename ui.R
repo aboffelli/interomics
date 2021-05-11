@@ -23,7 +23,7 @@ ui <- fluidPage(
           # OTU table input box
           fileInput(
             "otu",
-            "Choose OTU table file",
+            "Choose a OTU counts table file",
             multiple = F,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
@@ -32,7 +32,7 @@ ui <- fluidPage(
           # Taxonomic table input box
           fileInput(
             "taxa",
-            "Choose Taxonomic table file",
+            "Choose a Taxonomic table file",
             multiple = F,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
@@ -41,7 +41,7 @@ ui <- fluidPage(
           # Sample table input box
           fileInput(
             "sample",
-            "Choose Sample table file",
+            "Choose a Sample information table file",
             multiple = F,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
