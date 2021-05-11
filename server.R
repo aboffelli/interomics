@@ -34,27 +34,46 @@ create_taxa_tree <- function(taxa) {
 
 
 server <- function(input, output, session) {
+    observeEvent(input$example, {
+        data("GlobalPatterns")
+    })
+    
     # Upload tab
     taxa_df <- reactive({
-        as.matrix(read.table(input$taxa$datapath,
-                             header = input$header,
-                             sep = input$sep, row.names=1)[,1:9])
-        
+        if(!input$example) {
+            # Create the table based on the file
+            as.matrix(read.table(input$taxa$datapath,
+                                 header = input$header,
+                                 sep = input$sep, 
+                                 na.strings="",
+                                 row.names=1)[,1:9])
+        }
+        # Use example data
+        else GlobalPatterns@tax_table 
     })
     
     otu_df <- reactive({
-        as.matrix(read.table(input$otu$datapath,
-                             sep = input$sep,
-                             row.names=1,
-                             header=input$header,
-                             check.names=F)
-        )
+        if(!input$example) {
+            # Create the table based on the file
+            as.matrix(read.table(input$otu$datapath,
+                                 sep = input$sep,
+                                 row.names=1,
+                                 header=input$header,
+                                 check.names=F))
+        }
+        # Use example data
+        else GlobalPatterns@otu_table
     })
     
     sample_df <- reactive({
-        read.table(input$sample$datapath,
-                   header = input$header,
-                   sep = input$sep, row.names=1)
+        if(!input$example) {
+            # Create the table based on the file
+            read.table(input$sample$datapath,
+                       header = input$header,
+                       sep = input$sep, row.names=1)
+        }
+        # Use example data
+        else GlobalPatterns@sam_data
     })
     
     # Slidebar will react to change
@@ -63,55 +82,63 @@ server <- function(input, output, session) {
     })
     
     output$taxa_table <- renderTable({
-        req(input$taxa)
-        # display the table based on the slider
-        if (!input$all) {
+        if(!input$example) {
+            req(input$taxa)
+            # display the file table
             head(taxa_df(), n = headnum())
-        }
-        else
-            taxa_df()
-    }, rownames=T)
+            }
+        else    # Display the example table
+            head(taxa_df(), n = headnum())
+        },
+        rownames=T)
+            
     
     output$otu_table <- renderTable({
-        req(input$otu)
-        # display the table based on the slider
-        if (!input$all) {
+        if(!input$example) {
+            req(input$otu)
+            # display the file table
             head(otu_df(), n = headnum())
-        }
-        else
-            otu_df()
-    }, rownames=T)
+            }
+        else    # Display the example table
+            head(otu_df(), n=headnum())
+        }, 
+        rownames=T)
     
     output$sample_table <- renderTable({
-        req(input$sample)
-        # display the table based on the slider
-        if (!input$all) {
+        if(!input$example) {
+            req(input$sample)
+            # display the file table
             head(sample_df(), n = headnum())
-        }
-        else
-            sample_df()
-    }, rownames=T)
+            }
+        else    # Display the example table
+            head(as.matrix(sample_df()), n=headnum())
+    }, 
+    rownames=T)
     
-    # Button Taxonomic tree change to Taxonomy tab
-    observeEvent(input$abundance, {
-        req(input$taxa)
-        req(input$otu)
-        req(input$sample)
-        updateTabsetPanel(session,
-                          "tabset",
-                          selected = "taxa")
+    # Button Abundance change to Abundance tab
+    observeEvent(input$tabswitch, {
+        req(input$taxa, input$otu, input$sample)
+        
         # Update the variable options
-        updateVarSelectInput(session, "sample_var", data=sample_df(), selected=F)
+        updateVarSelectInput(session, 
+                             "sample_var", 
+                             data=sample_df(), selected=F)
+        x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
+        colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
+        updateVarSelectInput(session,
+                             "fill_var", 
+                             data = x, selected=F)
+        updateVarSelectInput(session,
+                             "shape_var", 
+                             data = x, selected=F)
     })
     
     # Button Annotation change to Plots tab
-    observeEvent(input$plots, {
-        req(input$taxa)
-        req(input$otu)
-        req(input$sample)
-        updateTabsetPanel(session,
-                          "tabset",
-                          selected = "graph")
+    observeEvent(input$tabswitch, {
+        req(input$example)
+        updateVarSelectInput(session, 
+                             "sample_var", 
+                             data=sample_df(), selected=F)
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
         updateVarSelectInput(session,

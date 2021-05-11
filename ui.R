@@ -15,7 +15,7 @@ ui <- fluidPage(
     )),
 
   tabsetPanel(
-    id = "tabset",
+    id = "tabswitch",
     tabPanel("File upload",
       value = "upload",
       sidebarLayout(
@@ -71,17 +71,9 @@ ui <- fluidPage(
             max = 50
           ),
           
-          # display the whole table
-          checkboxInput("all", "Display all", F),
-          
           checkboxInput("example", "Use an example dataset", F),
-          
-          # Button to Abundance tab.
-          actionButton("abundance", "Abundance"),
-          
-          # Button to Graphics tab.
-          actionButton("plots", "Graphics")
         ),
+        
         mainPanel(fluidRow(
           column(
             12,
