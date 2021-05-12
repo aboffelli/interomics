@@ -17,12 +17,21 @@ The program is written in R (4.0.3), and uses the following packages:
 
 ### Installing packages
 
-To install the necessary package open the R console and use the commands
+To install the necessary package open the R console and use the lines below.
 
 ```r
 packages <- c("shiny", "metacoder", "ggplot2", "plotly", "BiocManager")
 for(package in packages) install.packages(package)
 BiocManager::install("phyloseq", ask=FALSE)
+```
+
+### Running the program
+
+After the installation of the necessary packages, make sure that both files (*ui.R* and *server.R*) are in the same directory. You can run the program with the following line in the R console.
+
+```R
+# Remember that you may need to change the path to the directory according to where the files are saved.
+shiny::runApp("~/Interomics")
 ```
 
 
@@ -42,3 +51,4 @@ Each file will be loaded in the right panel, where the number of rows displayed 
 It is possible to load an example dataset selecting the checkbox under the slider. When selected, the three tables will be displayed.
 
 When all tables are displayed correctly you can continue for the Abundance and Graphics tabs. 
+

@@ -160,9 +160,11 @@ server <- function(input, output, session) {
                               otu=otu_df(),
                               sample=sample_df())
         
-        heat_plot <- plot_heatmap(phylo, sample.label=chosen_var)
-        ggplotly(heat_plot)
+
+        archaea <- subset_taxa(phylo, Kingdom=="Archaea")
         
+        heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, low="#66CCFF", high="#000033")
+        ggplotly(heat_plot)   
     })
     
     # Graphics tab
