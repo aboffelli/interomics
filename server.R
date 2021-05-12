@@ -160,10 +160,14 @@ server <- function(input, output, session) {
                               otu=otu_df(),
                               sample=sample_df())
         
-
-        archaea <- subset_taxa(phylo, Kingdom=="Archaea")
-        
-        heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, low="#66CCFF", high="#000033")
+        if(input$example) {
+            archaea <- subset_taxa(phylo, Kingdom=="Archaea")
+            
+            heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, low="#66CCFF", high="#000033")
+        }
+        else {
+            heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, low="#66CCFF", high="#000033")
+        }
         ggplotly(heat_plot)   
     })
     
