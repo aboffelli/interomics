@@ -8,7 +8,7 @@ theme_set(theme_bw())
 
 # Function to create a biplot object using phyloseq
 create_phylo <- function(taxa, otu, sample) {
-    OTU <- otu_table(otu, taxa_are_rows=T)
+    OTU <- otu_table(otu, taxa_are_rows=TRUE)
     TAXA <- tax_table(taxa)
     SAMPLE <- sample_data(sample)
     phylo <- phyloseq(OTU, TAXA, SAMPLE)
@@ -59,7 +59,7 @@ server <- function(input, output, session) {
                                  sep = input$sep,
                                  row.names=1,
                                  header=input$header,
-                                 check.names=F))
+                                 check.names=FALSE))
         }
         # Use example data
         else GlobalPatterns@otu_table
@@ -70,7 +70,8 @@ server <- function(input, output, session) {
             # Create the table based on the file
             read.table(input$sample$datapath,
                        header = input$header,
-                       sep = input$sep, row.names=1)
+                       sep = input$sep, 
+                       row.names=1)
         }
         # Use example data
         else GlobalPatterns@sam_data
@@ -90,7 +91,7 @@ server <- function(input, output, session) {
         else    # Display the example table
             head(taxa_df(), n = headnum())
         },
-        rownames=T)
+        rownames=TRUE)
             
     
     output$otu_table <- renderTable({
@@ -102,7 +103,7 @@ server <- function(input, output, session) {
         else    # Display the example table
             head(otu_df(), n=headnum())
         }, 
-        rownames=T)
+        rownames=TRUE)
     
     output$sample_table <- renderTable({
         if(!input$example) {
@@ -113,7 +114,7 @@ server <- function(input, output, session) {
         else    # Display the example table
             head(as.matrix(sample_df()), n=headnum())
     }, 
-    rownames=T)
+    rownames=TRUE)
     
     # Button Abundance change to Abundance tab
     observeEvent(input$tabswitch, {
@@ -122,31 +123,43 @@ server <- function(input, output, session) {
         # Update the variable options
         updateVarSelectInput(session, 
                              "sample_var", 
-                             data=sample_df(), selected=F)
+                             data=sample_df(), selected=FALSE)
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
         updateVarSelectInput(session,
                              "fill_var", 
-                             data = x, selected=F)
+                             data = x, selected=FALSE)
         updateVarSelectInput(session,
                              "shape_var", 
-                             data = x, selected=F)
+                             data = x, selected=FALSE)
+        updateVarSelectInput(session,
+                             "alpha_x_var",
+                             data=sample_df(), selected=FALSE)
+        updateVarSelectInput(session,
+                             "alpha_col_var",
+                             data=sample_df(), selected=FALSE)
     })
     
-    # Button Annotation change to Plots tab
+    # When changing tabs update all variable boxes
     observeEvent(input$tabswitch, {
         req(input$example)
         updateVarSelectInput(session, 
                              "sample_var", 
-                             data=sample_df(), selected=F)
+                             data=sample_df(), selected=FALSE)
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
         updateVarSelectInput(session,
                              "fill_var", 
-                             data = x, selected=F)
+                             data = x, selected=FALSE)
         updateVarSelectInput(session,
                              "shape_var", 
-                             data = x, selected=F)
+                             data = x, selected=FALSE)
+        updateVarSelectInput(session,
+                             "alpha_x_var",
+                             data=sample_df(), selected=FALSE)
+        updateVarSelectInput(session,
+                             "alpha_col_var",
+                             data=sample_df(), selected=FALSE)
     })
     
     # Taxonomy tab
@@ -172,13 +185,13 @@ server <- function(input, output, session) {
     })
     
     # Graphics tab
-    # Biplot output
     
+    # Biplot output
     output$biplot <- renderPlotly({
         # only works when clicking in "Graphics" button
-        req(input$fill_var)
-        req(input$shape_var)
+        req(input$fill_var, input$shape_var)
         chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
+
         phylo <- create_phylo(taxa=taxa_df(), 
                               otu=otu_df(),
                               sample=sample_df())
@@ -186,11 +199,31 @@ server <- function(input, output, session) {
         biplot <- create_biplot(phylo, 
                                 fill=chosen_var[1], 
                                 shape=chosen_var[2]) +
-            scale_shape(solid=F)
+            scale_shape(solid=FALSE)
         
         ggplotly(biplot, tooltip=c(chosen_var[1], 
                                    chosen_var[2], 
                                    "NMDS1", 
                                    "NMDS2"))
+    })
+    
+    # Alpha-diversity output
+    output$alpha <- renderPlotly({
+        req(input$alpha_measure_var)
+        
+        phylo <- create_phylo(taxa=taxa_df(), 
+                              otu=otu_df(),
+                              sample=sample_df())
+        
+        x <- NULL
+        if(!is.null(input$alpha_x_var)) x <- toString(input$alpha_x_var)
+        col <- NULL
+        if(!is.null(input$alpha_col_var)) col <- toString(input$alpha_col_var)
+        
+        alpha_div <- plot_richness(phylo,
+                                   x=x,
+                                   color=col,
+                                   measures=input$alpha_measure_var)
+        ggplotly(alpha_div)
     })
 }

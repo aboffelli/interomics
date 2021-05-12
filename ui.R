@@ -24,7 +24,7 @@ ui <- fluidPage(
           fileInput(
             "otu",
             "Choose a OTU counts table file",
-            multiple = F,
+            multiple = FALSE,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
           ),
@@ -33,7 +33,7 @@ ui <- fluidPage(
           fileInput(
             "taxa",
             "Choose a Taxonomic table file",
-            multiple = F,
+            multiple = FALSE,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
           ),
@@ -42,13 +42,13 @@ ui <- fluidPage(
           fileInput(
             "sample",
             "Choose a Sample information table file",
-            multiple = F,
+            multiple = FALSE,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
           ),
           
           # check box for header
-          checkboxInput("header", "Header", T),
+          checkboxInput("header", "Header", TRUE),
           
           # radio buttons for separator
           radioButtons(
@@ -70,10 +70,11 @@ ui <- fluidPage(
             min = 1,
             max = 50
           ),
-          
-          checkboxInput("example", "Use an example dataset", F),
+          # Checkbox that loads the example data
+          checkboxInput("example", "Use an example dataset", FALSE),
         ),
         
+        # Tables display
         mainPanel(fluidRow(
           column(
             12,
@@ -100,20 +101,23 @@ ui <- fluidPage(
       )
     ),
     
+    # Abundance tab containing Heatmap and possibly a taxonomic tree or barplot.
     tabPanel("Abundance",
-      # Code to display the taxonomic tree.
-      # Abundance filter slider if possible.
       value = "taxa",
-      # Variable selection box
-      fluidRow(
-        column(2,
-               varSelectInput("sample_var", 
-                              "Select the sample label", data=F),
-               helpText("Label that appears under each sample in the heatmap."))
-        ),
+      # Division between heatmap and tax tree
       navlistPanel(
         widths = c(2, 10),
+        
         tabPanel("Heatmap",
+                 # Variable selection box
+                 fluidRow(
+                   column(2,
+                          varSelectInput("sample_var", 
+                                         "Select the sample label", 
+                                         data=FALSE),
+                          helpText("Label that appears under each sample in the heatmap."))
+                 ),
+                 # Plot display
                  wellPanel(
                    plotlyOutput("heat_plot",
                                 height = "750px")
@@ -122,27 +126,49 @@ ui <- fluidPage(
         tabPanel("Taxonomic tree") 
       )),
     
+    # Graphics tab containing Biplot and Alpha Diversity plots
     tabPanel("Graphics",
-      # Code to display the graphics.
       value = "graph",
-      # Variable selection boxes
-      fluidRow(
-        column(2,
-               varSelectInput("fill_var", 
-                              "Select the color variable", data=F)),
-        column(2,
-               varSelectInput('shape_var', 
-                              "Select the shape variable", data=F))
-        ),
-      helpText("The color and shape of the points will be based on the variables selected"),
-      # Create a tab panel with different types of plots
+      # Division between Biplot and Alpha
       navlistPanel(
         widths = c(2, 10),
+        
         tabPanel("Biplot",
+                 # Variable selection boxes
+                 fluidRow(
+                   column(2,
+                          varSelectInput("fill_var", 
+                                         "Select the color variable", 
+                                         data=FALSE)),
+                   column(2,
+                          varSelectInput('shape_var', 
+                                         "Select the shape variable", 
+                                         data=FALSE))
+                 ),
+                 helpText("The color and shape of the points will be based on the variables selected"),
+                 # Plot display
                  wellPanel(plotlyOutput("biplot",
                                         height = "750px"))),
         tabPanel("Alpha Diversity",
-                 wellPanel())
+                 # Variables selection
+                 fluidRow(
+                   column(2,
+                          varSelectInput("alpha_x_var", 
+                                         "Select the x variable", 
+                                         data=FALSE)),
+                   column(2,
+                          varSelectInput("alpha_col_var",
+                                         "Select the color variable",
+                                         data=FALSE)),
+                   column(2,
+                          selectInput("alpha_measure_var", 
+                                      "Select the measures used",
+                                      choices=c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher"),
+                                      multiple=TRUE))
+                 ),
+                 # Plot display
+                 wellPanel(plotlyOutput("alpha",
+                                        height = "750px")))
       )
     )
   ),
