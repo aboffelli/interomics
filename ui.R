@@ -13,9 +13,11 @@ ui <- fluidPage(
       h2("An interactive application for metagenomic data"),
       align = 'center')
     )),
-
+  
+  # Main tabs of the page 
   tabsetPanel(
     id = "tabswitch",
+    
     tabPanel("File upload",
       value = "upload",
       sidebarLayout(
@@ -36,7 +38,7 @@ ui <- fluidPage(
             multiple = FALSE,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
-          ),
+            ),
           
           # Sample table input box
           fileInput(
@@ -47,19 +49,14 @@ ui <- fluidPage(
                        "text/comma-separated-values,text/plain")
           ),
           
-          # check box for header
-          checkboxInput("header", "Header", TRUE),
-          
           # radio buttons for separator
-          radioButtons(
-            "sep",
-            "Separator",
-            choices = c(
-              Tab = "\t",
-              Comma = ",",
-              Semicolon = ";"
-            ),
-            selected = "\t"
+          radioButtons("sep",
+                       "Separator",
+                       choices = c(
+                         Tab = "\t",
+                         Comma = ",",
+                         Semicolon = ";"),
+                       selected = "\t"
           ),
           
           # slider for number of rows to display
@@ -70,6 +67,7 @@ ui <- fluidPage(
             min = 1,
             max = 50
           ),
+          
           # Checkbox that loads the example data
           checkboxInput("example", "Use an example dataset", FALSE),
         ),
@@ -111,12 +109,13 @@ ui <- fluidPage(
         tabPanel("Heatmap",
                  # Variable selection box
                  fluidRow(
-                   column(2,
+                   column(3,
                           varSelectInput("sample_var", 
                                          "Select the sample label", 
                                          data=FALSE),
-                          helpText("Label that appears under each sample in the heatmap."))
-                 ),
+                          )
+                   ),
+                 helpText("The selection is required to load the plot and defines the label under each sample"),
                  # Plot display
                  wellPanel(
                    plotlyOutput("heat_plot",
@@ -145,10 +144,11 @@ ui <- fluidPage(
                                          "Select the shape variable", 
                                          data=FALSE))
                  ),
-                 helpText("The color and shape of the points will be based on the variables selected"),
+                 helpText("Both, color and shape variables, are required to load the plot."),
                  # Plot display
                  wellPanel(plotlyOutput("biplot",
                                         height = "750px"))),
+        
         tabPanel("Alpha Diversity",
                  # Variables selection
                  fluidRow(
@@ -163,9 +163,13 @@ ui <- fluidPage(
                    column(2,
                           selectInput("alpha_measure_var", 
                                       "Select the measures used",
-                                      choices=c("Observed", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher"),
+                                      choices=c("Observed", "Chao1", "ACE",
+                                                "Shannon", "Simpson",
+                                                "InvSimpson", "Fisher"),
                                       multiple=TRUE))
                  ),
+                   helpText("The X variable and the measure are required. More then one measure can be selected at the same time."),
+                 
                  # Plot display
                  wellPanel(plotlyOutput("alpha",
                                         height = "750px")))

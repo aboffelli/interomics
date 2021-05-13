@@ -17,7 +17,9 @@ create_phylo <- function(taxa, otu, sample) {
 
 create_biplot <- function(phylo_object, fill, shape) {
     phylo.ord <- ordinate(phylo_object, "NMDS", "bray")
-    biplot <- plot_ordination(phylo_object, phylo.ord, type="split", color=fill, shape=shape)
+    biplot <- plot_ordination(phylo_object, phylo.ord, 
+                              type="split", color=fill, 
+                              shape=shape)
     return(biplot)
 }
 
@@ -43,7 +45,7 @@ server <- function(input, output, session) {
         if(!input$example) {
             # Create the table based on the file
             as.matrix(read.table(input$taxa$datapath,
-                                 header = input$header,
+                                 header = TRUE,
                                  sep = input$sep, 
                                  na.strings="",
                                  row.names=1)[,1:9])
@@ -58,7 +60,7 @@ server <- function(input, output, session) {
             as.matrix(read.table(input$otu$datapath,
                                  sep = input$sep,
                                  row.names=1,
-                                 header=input$header,
+                                 header=TRUE,
                                  check.names=FALSE))
         }
         # Use example data
@@ -68,14 +70,17 @@ server <- function(input, output, session) {
     sample_df <- reactive({
         if(!input$example) {
             # Create the table based on the file
-            read.table(input$sample$datapath,
-                       header = input$header,
-                       sep = input$sep, 
-                       row.names=1)
+            df <- read.table(input$sample$datapath,
+                       header = TRUE,
+                       sep = input$sep)
+            row.names(df) <- df[,1]
+            df
         }
         # Use example data
         else GlobalPatterns@sam_data
     })
+
+    
     
     # Slidebar will react to change
     headnum <- eventReactive(input$rownum, {
@@ -116,7 +121,7 @@ server <- function(input, output, session) {
     }, 
     rownames=TRUE)
     
-    # Button Abundance change to Abundance tab
+    # Update variable boxes when change tab (Upload files)
     observeEvent(input$tabswitch, {
         req(input$taxa, input$otu, input$sample)
         
@@ -140,12 +145,16 @@ server <- function(input, output, session) {
                              data=sample_df(), selected=FALSE)
     })
     
-    # When changing tabs update all variable boxes
+    # Update variable boxes when change tab (Example data)
     observeEvent(input$tabswitch, {
         req(input$example)
+        # Heatmap
         updateVarSelectInput(session, 
                              "sample_var", 
                              data=sample_df(), selected=FALSE)
+        
+        # Biplot
+        # Create a df with all sample and taxa columns
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
         updateVarSelectInput(session,
@@ -154,6 +163,7 @@ server <- function(input, output, session) {
         updateVarSelectInput(session,
                              "shape_var", 
                              data = x, selected=FALSE)
+        # Alpha diversity
         updateVarSelectInput(session,
                              "alpha_x_var",
                              data=sample_df(), selected=FALSE)
@@ -162,10 +172,11 @@ server <- function(input, output, session) {
                              data=sample_df(), selected=FALSE)
     })
     
-    # Taxonomy tab
-    # Build the tax tree
+    # Abundance tab
+    
+    # Heatmap output
     output$heat_plot <- renderPlotly({
-        # only works when clicking in "Taxonomic tree" Button
+        # only works after selecting the sample label
         req(input$sample_var)
         
         chosen_var <- toString(input$sample_var)
@@ -181,14 +192,16 @@ server <- function(input, output, session) {
         else {
             heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, low="#66CCFF", high="#000033")
         }
-        ggplotly(heat_plot)   
+        ggplotly(heat_plot
+                 + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
+                 )   
     })
     
     # Graphics tab
     
     # Biplot output
     output$biplot <- renderPlotly({
-        # only works when clicking in "Graphics" button
+        # only works after selecting fill and shape
         req(input$fill_var, input$shape_var)
         chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
 
@@ -201,29 +214,38 @@ server <- function(input, output, session) {
                                 shape=chosen_var[2]) +
             scale_shape(solid=FALSE)
         
-        ggplotly(biplot, tooltip=c(chosen_var[1], 
-                                   chosen_var[2], 
-                                   "NMDS1", 
-                                   "NMDS2"))
+        ggplotly(biplot
+                 + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")),
+                 tooltip=c(chosen_var[1],
+                           chosen_var[2], 
+                           "NMDS1", 
+                           "NMDS2"))
     })
     
     # Alpha-diversity output
     output$alpha <- renderPlotly({
-        req(input$alpha_measure_var)
+        # Only works after selecting measure and x.
+        req(input$alpha_measure_var, input$alpha_x_var)
         
         phylo <- create_phylo(taxa=taxa_df(), 
                               otu=otu_df(),
                               sample=sample_df())
         
-        x <- NULL
-        if(!is.null(input$alpha_x_var)) x <- toString(input$alpha_x_var)
+        Alpha <- prune_taxa(taxa_sums(phylo) > 10, phylo) 
+        
+        x <- toString(input$alpha_x_var)
+        
+        # Color default will be black, unless selected by the user.
         col <- NULL
         if(!is.null(input$alpha_col_var)) col <- toString(input$alpha_col_var)
         
-        alpha_div <- plot_richness(phylo,
+        alpha_div <- plot_richness(Alpha,
                                    x=x,
                                    color=col,
                                    measures=input$alpha_measure_var)
-        ggplotly(alpha_div)
+        ggplotly(alpha_div 
+                 + theme(plot.margin = unit(c(1, 1, 1, 1.5), "cm")),
+                 tooltip=c(x, col, "value")
+                 )
     })
 }
