@@ -6,7 +6,7 @@ library(ggplot2)
 # Set a new theme for ggplot
 theme_set(theme_bw())
 
-# Function to create a biplot object using phyloseq
+# Function to create a phylo object using phyloseq
 create_phylo <- function(taxa, otu, sample) {
     OTU <- otu_table(otu, taxa_are_rows=TRUE)
     TAXA <- tax_table(taxa)
@@ -15,6 +15,7 @@ create_phylo <- function(taxa, otu, sample) {
     return(phylo)
 }
 
+# Function to create a phylo object using phyloseq
 create_biplot <- function(phylo_object, fill, shape) {
     phylo.ord <- ordinate(phylo_object, "NMDS", "bray")
     biplot <- plot_ordination(phylo_object, phylo.ord, 
@@ -23,14 +24,48 @@ create_biplot <- function(phylo_object, fill, shape) {
     return(biplot)
 }
 
+# Function to create a heatmap
 create_heatmap <- function(phylo_object) {
     heat_plot <- plot_heatmap(phylo_object)
     return(heat_plot)
 }
 
+
 # Function to generate the taxonomic tree.
-create_taxa_tree <- function(taxa) {
+create_taxmap <- function(taxa, otu, sample) {
+    # Create a taxonomy column
+    taxa_cols <- matrix(nrow=nrow(df), ncol=1)
+    for(i in 1:nrow(df)) {
+        tax_line <- toString(df[i,])
+        tax_line <- gsub(", NA", "", tax_line)
+        tax_line <- gsub(", ", ";", tax_line)
+        
+        taxa_cols[i,1] <- tax_line
+    }
+    colnames(taxa_cols) <- "Taxonomy"
     
+    taxonomic_df <- cbind(taxa, taxa_cols)
+    
+    taxmap <- parse_tax_data(taxonomic_df, 
+                              class_cols="Taxonomy", 
+                              class_sep=";")
+    names(taxa$data) <- "otu_counts"
+    return(taxmap)
+}
+
+# Functions to the subset option
+# Change the selected column to a default name
+subset_col_on <- function(phylo, tax_col) {
+    positions <- colnames(phylo@tax_table@.Data)
+    colnames(phylo@tax_table@.Data)[which(positions==tax_col)] <- "sel_col"
+    return(phylo)
+}
+
+# Change the column name back to the original
+subset_col_off <- function(phylo, tax_col) {
+    positions <- colnames(phylo@tax_table@.Data)
+    colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- tax_col
+    return(phylo)
 }
 
 
@@ -183,14 +218,17 @@ server <- function(input, output, session) {
         phylo <- create_phylo(taxa=taxa_df(), 
                               otu=otu_df(),
                               sample=sample_df())
+        colnames(phylo@tax_table@.Data)[1] <- "Domain"
         
         if(input$example) {
-            archaea <- subset_taxa(phylo, Kingdom=="Archaea")
+            archaea <- subset_taxa(phylo, Domain=="Archaea")
             
-            heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, low="#66CCFF", high="#000033")
+            heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, 
+                                      low="#66CCFF", high="#000033")
         }
         else {
-            heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, low="#66CCFF", high="#000033")
+            heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, 
+                                      low="#66CCFF", high="#000033")
         }
         ggplotly(heat_plot
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
