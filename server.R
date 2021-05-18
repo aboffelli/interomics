@@ -32,24 +32,24 @@ create_heatmap <- function(phylo_object) {
 
 
 # Function to generate the taxonomic tree.
-create_taxmap <- function(taxa, otu, sample) {
+create_taxmap <- function(taxa, otu) {
     # Create a taxonomy column
-    taxa_cols <- matrix(nrow=nrow(df), ncol=1)
-    for(i in 1:nrow(df)) {
-        tax_line <- toString(df[i,])
+    taxa_col <- as.data.frame(matrix(nrow=nrow(taxa), ncol=1))
+    for(i in 1:nrow(taxa)) {
+        tax_line <- toString(taxa[i,])
         tax_line <- gsub(", NA", "", tax_line)
         tax_line <- gsub(", ", ";", tax_line)
         
-        taxa_cols[i,1] <- tax_line
+        taxa_col[i,1] <- tax_line
     }
-    colnames(taxa_cols) <- "Taxonomy"
+    colnames(taxa_col) <- "Taxonomy"
     
-    taxonomic_df <- cbind(taxa, taxa_cols)
-    
-    taxmap <- parse_tax_data(taxonomic_df, 
-                              class_cols="Taxonomy", 
-                              class_sep=";")
-    names(taxa$data) <- "otu_counts"
+    taxonomic_df <- cbind(otu, taxa_col)
+
+    taxmap <- parse_tax_data(taxonomic_df,
+                             class_cols="Taxonomy", 
+                             class_sep=";")
+    names(taxmap$data) <- "otu_counts"
     return(taxmap)
 }
 
@@ -156,14 +156,28 @@ server <- function(input, output, session) {
     }, 
     rownames=TRUE)
     
+    # TODO: Eliminate duplicated code to update variables
+    
     # Update variable boxes when change tab (Upload files)
     observeEvent(input$tabswitch, {
         req(input$taxa, input$otu, input$sample)
-        
-        # Update the variable options
+        # Heatmap
         updateVarSelectInput(session, 
                              "sample_var", 
                              data=sample_df(), selected=FALSE)
+        #Tax tree
+        updateSliderInput(session, 'abundance_filter',
+                          min=0, max=sum(
+                              rowSums(
+                                  otu_df()[,row.names(
+                                      sample_df())])
+                          ))
+        updateSelectInput(session, 
+                          "taxa_filter_level", 
+                          choices=colnames(taxa_df()), selected=FALSE)
+        
+        # Biplot
+        # Create a df with all sample and taxa columns
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
         updateVarSelectInput(session,
@@ -172,6 +186,7 @@ server <- function(input, output, session) {
         updateVarSelectInput(session,
                              "shape_var", 
                              data = x, selected=FALSE)
+        # Alpha diversity
         updateVarSelectInput(session,
                              "alpha_x_var",
                              data=sample_df(), selected=FALSE)
@@ -187,6 +202,16 @@ server <- function(input, output, session) {
         updateVarSelectInput(session, 
                              "sample_var", 
                              data=sample_df(), selected=FALSE)
+        #Tax tree
+        updateSliderInput(session, 'abundance_filter',
+                          min=0, max=sum(
+                              rowSums(
+                                  otu_df()[,row.names(
+                                      sample_df())])
+                          ))
+        updateSelectInput(session, 
+                          "taxa_filter_level", 
+                          choices=colnames(taxa_df()), selected=FALSE)
         
         # Biplot
         # Create a df with all sample and taxa columns
@@ -234,6 +259,51 @@ server <- function(input, output, session) {
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
                  )   
     })
+    
+    # Taxonomy tree tab
+    observeEvent(input$taxa_filter_level, {
+        req(input$taxa_filter_level)
+        level <- toString(input$taxa_filter_level)
+        if(!input$example){
+            updateSelectInput(session,
+                              "taxa_filter_selection",
+                              choices=unique(taxa_df()[,level]),
+                              selected=FALSE)
+        }
+        else {
+        updateSelectInput(session,
+                          "taxa_filter_selection",
+                          choices=unique(taxa_df()@.Data[,level]),
+                          selected=FALSE)
+            }
+    })
+    
+    output$tax_tree <- renderPlot({
+        req(input$make_tree)
+        filter_num <- input$abundance_filter
+        
+        taxmap <- create_taxmap(taxa=taxa_df(), 
+                                otu=otu_df())
+
+        if(!is.null(input$taxa_filter_selection)){
+            taxmap <- taxa::filter_taxa(taxmap,
+                                  taxon_names==toString(
+                                      input$taxa_filter_selection),
+                                  subtaxa=TRUE)
+        }
+        
+        reads_filter <- rowSums(
+            taxmap$data$otu_counts[,row.names(sample_df())]) < filter_num
+        
+        taxmap <- filter_obs(taxmap, "otu_counts",
+                             !reads_filter, drop_taxa=TRUE)
+        
+        heat_tree(taxmap,
+                  node_label = taxon_names,
+                  node_size = n_obs,
+                  node_color=n_obs)
+    })
+    
     
     # Graphics tab
     

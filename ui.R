@@ -104,6 +104,7 @@ ui <- fluidPage(
       value = "taxa",
       # Division between heatmap and tax tree
       navlistPanel(
+        id="tax_tabs",
         widths = c(2, 10),
         
         tabPanel("Heatmap",
@@ -116,14 +117,38 @@ ui <- fluidPage(
                           )
                    ),
                  helpText("The selection is required to load the plot and defines the label under each sample"),
-                 # Plot display
+                 # Heatmap display
                  wellPanel(
                    plotlyOutput("heat_plot",
                                 height = "750px")
                  )),
         
-        tabPanel("Taxonomic tree") 
-      )),
+        tabPanel("Taxonomic tree",
+                 fluidRow(
+                   column(12,
+                   sliderInput("abundance_filter", 
+                               "Select the minimum abundance to display", 
+                               min=0, 
+                               max=1, 
+                               value=0, 
+                               width='100%')),
+                   column(2,
+                          selectInput("taxa_filter_level", 
+                                      "Select the level to filter", 
+                                      choices=NULL)),
+                   column(2,
+                          selectInput("taxa_filter_selection", 
+                                      "Select the group to filter", 
+                                      choices=NULL))
+                   
+                   ),
+                 actionButton("make_tree", "Create tree"),
+                 helpText("Help message"),
+                 wellPanel(
+                   plotOutput("tax_tree",
+                              height="1000px")
+                   ))
+        )),
     
     # Graphics tab containing Biplot and Alpha Diversity plots
     tabPanel("Graphics",
