@@ -70,7 +70,28 @@ ui <- fluidPage(
           
           # Checkbox that loads the example data
           checkboxInput("example", "Use an example dataset", FALSE),
-        ),
+          br(),
+          
+          p(strong("Subset the data")),
+          br(),
+          
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_type",
+                          "Select the table",
+                          choices=c("", "Taxa", "Sample"),
+                          width="100%")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_level",
+                          "Select the level", 
+                          choices=NULL,
+                          width="100%")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_choice",
+                          "Select the object", 
+                          choices=NULL,
+                          width="100%")),
+          checkboxInput("use_subset", "Use subsetted data", FALSE)
+          ),
         
         # Tables display
         mainPanel(fluidRow(
@@ -94,10 +115,9 @@ ui <- fluidPage(
             p(strong("Sample table")),
             div(style = "height:200px; overflow-y:scroll",
                 tableOutput("sample_table"))
-          )
-        ))
-      )
-    ),
+            ))
+          ))
+      ),
     
     # Abundance tab containing Heatmap and possibly a taxonomic tree or barplot.
     tabPanel("Abundance",
@@ -202,7 +222,8 @@ ui <- fluidPage(
     )
   ),
   # print a line
-  hr(),
+  column(12,
+         hr(),
   # link to GitHub
   p(strong("Visit "),
     strong(
@@ -210,4 +231,4 @@ ui <- fluidPage(
         "Interomics GitHub")
     ),
     strong("for more information."))
-)
+  ))

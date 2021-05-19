@@ -156,6 +156,65 @@ server <- function(input, output, session) {
     }, 
     rownames=TRUE)
     
+    # TODO: Eliminate repeated code to update variables
+    # Subset variables
+    observeEvent(input$subset_type, {
+        if(!input$example){
+            req(input$taxa, input$sample)
+        
+            if(toString(input$subset_type)=="Taxa") {
+                updateSelectInput(session, "subset_level", 
+                                  choices=colnames(taxa_df()),
+                                  selected=FALSE)
+            }
+            else {
+                updateSelectInput(session, "subset_level", 
+                                  choices=colnames(sample_df()),
+                                  selected=FALSE)
+            }}
+        else {
+            if(toString(input$subset_type)=="Taxa") {
+                updateSelectInput(session, "subset_level", 
+                                  choices=colnames(taxa_df()),
+                                  selected=FALSE)
+            }
+            else {
+                updateSelectInput(session, "subset_level", 
+                                  choices=colnames(sample_df()),
+                                  selected=FALSE)
+            }}
+    })
+    
+    observeEvent(input$subset_level, {
+        req(input$subset_level)
+        level <- toString(input$subset_level)
+        if(!input$example){
+            if(toString(input$subset_type)=="Taxa")
+                updateSelectInput(session,
+                                  "subset_choice",
+                                  choices=unique(taxa_df()[,level]),
+                                  selected=FALSE)
+            else {
+                updateSelectInput(session,
+                                  "subset_choice",
+                                  choices=unique(sample_df()[,level]),
+                                  selected=FALSE)
+            }
+        }
+        else {
+            if(toString(input$subset_type)=="Taxa")
+                updateSelectInput(session,
+                                  "subset_choice",
+                                  choices=unique(taxa_df()@.Data[,level]),
+                                  selected=FALSE)
+            else {
+                updateSelectInput(session,
+                                  "subset_choice",
+                                  choices=unique(sample_df()[,level]),
+                                  selected=FALSE)
+            }
+        }
+    })
     # TODO: Eliminate duplicated code to update variables
     
     # Update variable boxes when change tab (Upload files)
