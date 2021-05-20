@@ -53,20 +53,26 @@ create_taxmap <- function(taxa, otu) {
     return(taxmap)
 }
 
-# Functions to the subset option
-# Change the selected column to a default name
-subset_col_on <- function(phylo, tax_col) {
-    positions <- colnames(phylo@tax_table@.Data)
-    colnames(phylo@tax_table@.Data)[which(positions==tax_col)] <- "sel_col"
+# Function to subset the phylo object
+subset_func <- function(phylo, level, choice, t_or_s) {
+    if(t_or_s == "t") {
+        # Change the column name
+        positions <- colnames(phylo@tax_table@.Data)
+        colnames(phylo@tax_table@.Data)[which(positions == level)] <- "sel_col"
+        phylo@tax_table@.Data[phylo@tax_table@.Data == choice] <- "choice"
+        
+        # Subset the object
+        phylo <- subset_taxa(phylo, sel_col== "choice")
+        
+        # Change the column back
+        positions <- colnames(phylo@tax_table@.Data)
+        colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- level
+        phylo@tax_table@.Data[phylo@tax_table@.Data == "choice"] <- choice
+        }
+        
     return(phylo)
 }
 
-# Change the column name back to the original
-subset_col_off <- function(phylo, tax_col) {
-    positions <- colnames(phylo@tax_table@.Data)
-    colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- tax_col
-    return(phylo)
-}
 
 
 
@@ -157,6 +163,7 @@ server <- function(input, output, session) {
     rownames=TRUE)
     
     # TODO: Eliminate repeated code to update variables
+    # TODO: Observe event is subset_type, if this changes before data input the variables do not update
     # Subset variables
     observeEvent(input$subset_type, {
         if(!input$example){
@@ -302,10 +309,9 @@ server <- function(input, output, session) {
         phylo <- create_phylo(taxa=taxa_df(), 
                               otu=otu_df(),
                               sample=sample_df())
-        colnames(phylo@tax_table@.Data)[1] <- "Domain"
         
         if(input$example) {
-            archaea <- subset_taxa(phylo, Domain=="Archaea")
+            archaea <- subset_taxa(phylo, Kingdom=="Archaea")
             
             heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, 
                                       low="#66CCFF", high="#000033")
@@ -375,6 +381,19 @@ server <- function(input, output, session) {
         phylo <- create_phylo(taxa=taxa_df(), 
                               otu=otu_df(),
                               sample=sample_df())
+        if(input$use_subset) {
+            # TODO: subset only works if there is no NA in the column, fix it
+            type <- toString(input$subset_type)
+            level <- toString(input$subset_level)
+            choice <- toString(input$subset_choice)
+            if(type=="Taxa") {
+                phylo <- subset_func(phylo=phylo, 
+                                 level=level, 
+                                 choice=choice, 
+                                 "t")
+            }
+            
+        }
         
         biplot <- create_biplot(phylo, 
                                 fill=chosen_var[1], 
