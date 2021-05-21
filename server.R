@@ -24,13 +24,6 @@ create_biplot <- function(phylo_object, fill, shape) {
     return(biplot)
 }
 
-# Function to create a heatmap
-create_heatmap <- function(phylo_object) {
-    heat_plot <- plot_heatmap(phylo_object)
-    return(heat_plot)
-}
-
-
 # Function to generate the taxonomic tree.
 create_taxmap <- function(taxa, otu) {
     # Create a taxonomy column
@@ -99,6 +92,7 @@ server <- function(input, output, session) {
     # Upload tab
     taxa_df <- reactive({
         if(!input$example) {
+            req(input$taxa)
             # Create the table based on the file
             as.matrix(read.table(input$taxa$datapath,
                                  header = TRUE,
@@ -112,6 +106,7 @@ server <- function(input, output, session) {
     
     otu_df <- reactive({
         if(!input$example) {
+            req(input$otu)
             # Create the table based on the file
             as.matrix(read.table(input$otu$datapath,
                                  sep = input$sep,
@@ -125,6 +120,7 @@ server <- function(input, output, session) {
     
     sample_df <- reactive({
         if(!input$example) {
+            req(input$sample)
             # Create the table based on the file
             df <- read.table(input$sample$datapath,
                        header = TRUE,
@@ -134,6 +130,34 @@ server <- function(input, output, session) {
         }
         # Use example data
         else GlobalPatterns@sam_data
+    })
+    
+    phylo <- reactive({
+        req(taxa_df(), otu_df(), sample_df())
+        
+        phylo <- create_phylo(taxa=taxa_df(),
+                              otu=otu_df(),
+                              sample=sample_df())
+        if(input$use_subset) {
+            # TODO: subset only works if there is no NA in the column, fix it
+            type <- toString(input$subset_type)
+            level <- toString(input$subset_level)
+            choice <- toString(input$subset_choice)
+            if(type=="Taxa") {
+                phylo <- subset_func(phylo=phylo, 
+                                     level=level, 
+                                     choice=choice, 
+                                     "t")
+            }
+            else {
+                phylo <- subset_func(phylo=phylo, 
+                                     level=level, 
+                                     choice=choice, 
+                                     "s")
+            }
+            
+        }
+        phylo
     })
 
     # Slidebar will react to change
@@ -175,71 +199,45 @@ server <- function(input, output, session) {
     }, 
     rownames=TRUE)
     
-    # TODO: Eliminate repeated code to update variables
     # TODO: Observe event is subset_type, if this changes before data input the variables do not update
-    # Subset variables
+    
+    # Subset variables level
     observeEvent(input$subset_type, {
-        if(!input$example){
-            req(input$taxa, input$sample)
-        
-            if(toString(input$subset_type)=="Taxa") {
-                updateSelectInput(session, "subset_level", 
-                                  choices=colnames(taxa_df()),
-                                  selected=FALSE)
-            }
-            else {
-                updateSelectInput(session, "subset_level", 
-                                  choices=colnames(sample_df()),
-                                  selected=FALSE)
-            }}
+        req(taxa_df(), otu_df(), sample_df())
+    
+        if(toString(input$subset_type)=="Taxa") {
+            updateSelectInput(session, "subset_level", 
+                              choices=colnames(taxa_df()),
+                              selected=FALSE)
+        }
         else {
-            if(toString(input$subset_type)=="Taxa") {
-                updateSelectInput(session, "subset_level", 
-                                  choices=colnames(taxa_df()),
-                                  selected=FALSE)
-            }
-            else {
-                updateSelectInput(session, "subset_level", 
-                                  choices=colnames(sample_df()),
-                                  selected=FALSE)
-            }}
+            updateSelectInput(session, "subset_level", 
+                              choices=colnames(sample_df()),
+                              selected=FALSE)
+        }
     })
     
+    # Subset variable choice
     observeEvent(input$subset_level, {
         req(input$subset_level)
         level <- toString(input$subset_level)
-        if(!input$example){
-            if(toString(input$subset_type)=="Taxa")
-                updateSelectInput(session,
-                                  "subset_choice",
-                                  choices=unique(taxa_df()[,level]),
-                                  selected=FALSE)
-            else {
-                updateSelectInput(session,
-                                  "subset_choice",
-                                  choices=unique(sample_df()[,level]),
-                                  selected=FALSE)
-            }
-        }
+        if(toString(input$subset_type)=="Taxa")
+            updateSelectInput(session,
+                              "subset_choice",
+                              choices=unique(taxa_df()[,level]),
+                              selected=FALSE)
         else {
-            if(toString(input$subset_type)=="Taxa")
-                updateSelectInput(session,
-                                  "subset_choice",
-                                  choices=unique(taxa_df()@.Data[,level]),
-                                  selected=FALSE)
-            else {
-                updateSelectInput(session,
-                                  "subset_choice",
-                                  choices=unique(sample_df()[,level]),
-                                  selected=FALSE)
+            updateSelectInput(session,
+                              "subset_choice",
+                              choices=unique(sample_df()[,level]),
+                              selected=FALSE)
             }
-        }
     })
-    # TODO: Eliminate duplicated code to update variables
     
-    # Update variable boxes when change tab (Upload files)
+    # Update variable boxes when change tab
     observeEvent(input$tabswitch, {
-        req(input$taxa, input$otu, input$sample)
+        req(taxa_df(), otu_df(), sample_df())
+        
         # Heatmap
         updateVarSelectInput(session, 
                              "sample_var", 
@@ -265,6 +263,7 @@ server <- function(input, output, session) {
         updateVarSelectInput(session,
                              "shape_var", 
                              data = x, selected=FALSE)
+        
         # Alpha diversity
         updateVarSelectInput(session,
                              "alpha_x_var",
@@ -274,42 +273,6 @@ server <- function(input, output, session) {
                              data=sample_df(), selected=FALSE)
     })
     
-    # Update variable boxes when change tab (Example data)
-    observeEvent(input$tabswitch, {
-        req(input$example)
-        # Heatmap
-        updateVarSelectInput(session, 
-                             "sample_var", 
-                             data=sample_df(), selected=FALSE)
-        #Tax tree
-        updateSliderInput(session, 'abundance_filter',
-                          min=0, max=sum(
-                              rowSums(
-                                  otu_df()[,row.names(
-                                      sample_df())])
-                          ))
-        updateSelectInput(session, 
-                          "taxa_filter_level", 
-                          choices=colnames(taxa_df()), selected=FALSE)
-        
-        # Biplot
-        # Create a df with all sample and taxa columns
-        x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
-        colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
-        updateVarSelectInput(session,
-                             "fill_var", 
-                             data = x, selected=FALSE)
-        updateVarSelectInput(session,
-                             "shape_var", 
-                             data = x, selected=FALSE)
-        # Alpha diversity
-        updateVarSelectInput(session,
-                             "alpha_x_var",
-                             data=sample_df(), selected=FALSE)
-        updateVarSelectInput(session,
-                             "alpha_col_var",
-                             data=sample_df(), selected=FALSE)
-    })
     
     # Abundance tab
     
@@ -319,43 +282,28 @@ server <- function(input, output, session) {
         req(input$sample_var)
         
         chosen_var <- toString(input$sample_var)
-        phylo <- create_phylo(taxa=taxa_df(), 
-                              otu=otu_df(),
-                              sample=sample_df())
-        
-        if(input$example) {
-            archaea <- subset_taxa(phylo, Kingdom=="Archaea")
-            
-            heat_plot <- plot_heatmap(archaea, sample.label=chosen_var, 
+        phylo <- phylo()
+
+        heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, 
                                       low="#66CCFF", high="#000033")
-        }
-        else {
-            heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, 
-                                      low="#66CCFF", high="#000033")
-        }
         ggplotly(heat_plot
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
                  )   
     })
     
     # Taxonomy tree tab
+    # Taxa filter
     observeEvent(input$taxa_filter_level, {
         req(input$taxa_filter_level)
         level <- toString(input$taxa_filter_level)
-        if(!input$example){
-            updateSelectInput(session,
-                              "taxa_filter_selection",
-                              choices=unique(taxa_df()[,level]),
-                              selected=FALSE)
-        }
-        else {
+
         updateSelectInput(session,
                           "taxa_filter_selection",
-                          choices=unique(taxa_df()@.Data[,level]),
+                          choices=unique(taxa_df()[,level]),
                           selected=FALSE)
-            }
     })
     
+    # Tree display
     output$tax_tree <- renderPlot({
         req(input$make_tree)
         filter_num <- input$abundance_filter
@@ -391,28 +339,8 @@ server <- function(input, output, session) {
         req(input$fill_var, input$shape_var)
         chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
 
-        phylo <- create_phylo(taxa=taxa_df(), 
-                              otu=otu_df(),
-                              sample=sample_df())
-        if(input$use_subset) {
-            # TODO: subset only works if there is no NA in the column, fix it
-            type <- toString(input$subset_type)
-            level <- toString(input$subset_level)
-            choice <- toString(input$subset_choice)
-            if(type=="Taxa") {
-                phylo <- subset_func(phylo=phylo, 
-                                 level=level, 
-                                 choice=choice, 
-                                 "t")
-            }
-            else {
-                phylo <- subset_func(phylo=phylo, 
-                                     level=level, 
-                                     choice=choice, 
-                                     "s")
-            }
-            
-        }
+        phylo <- phylo()
+        
         
         biplot <- create_biplot(phylo, 
                                 fill=chosen_var[1], 
