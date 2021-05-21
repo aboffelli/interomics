@@ -68,7 +68,22 @@ subset_func <- function(phylo, level, choice, t_or_s) {
         positions <- colnames(phylo@tax_table@.Data)
         colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- level
         phylo@tax_table@.Data[phylo@tax_table@.Data == "choice"] <- choice
-        }
+    }
+    else {
+        positions <- colnames(phylo@sam_data)
+        colnames(phylo@sam_data)[which(positions==level)] <- "sel_col" 
+        change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
+        change[change==choice] <- "choice"
+        phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
+        
+        phylo <- subset_samples(phylo, sel_col=="choice")
+        
+        change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
+        change[change=="choice"] <- choice
+        phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
+        positions <- colnames(phylo@sam_data)
+        colnames(phylo@sam_data)[which(positions=="sel_col")] <- level
+    }
         
     return(phylo)
 }
@@ -121,8 +136,6 @@ server <- function(input, output, session) {
         else GlobalPatterns@sam_data
     })
 
-    
-    
     # Slidebar will react to change
     headnum <- eventReactive(input$rownum, {
         input$rownum
@@ -391,6 +404,12 @@ server <- function(input, output, session) {
                                  level=level, 
                                  choice=choice, 
                                  "t")
+            }
+            else {
+                phylo <- subset_func(phylo=phylo, 
+                                     level=level, 
+                                     choice=choice, 
+                                     "s")
             }
             
         }
