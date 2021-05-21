@@ -87,7 +87,7 @@ ui <- fluidPage(
                           width="100%")),
           div(style="display: inline-block; width: 32%",
               selectInput("subset_choice",
-                          "Select the object", 
+                          "Select the target group", 
                           choices=NULL,
                           width="100%")),
           checkboxInput("use_subset", "Use subsetted data", FALSE)
@@ -119,6 +119,7 @@ ui <- fluidPage(
           ))
       ),
     
+###############################################################################
     # Abundance tab containing Heatmap and possibly a taxonomic tree or barplot.
     tabPanel("Abundance",
       value = "taxa",
@@ -149,7 +150,7 @@ ui <- fluidPage(
                    sliderInput("abundance_filter", 
                                "Select the minimum abundance to display", 
                                min=0, 
-                               max=1, 
+                               max=1000, 
                                value=0, 
                                width='100%')),
                    column(2,
@@ -158,11 +159,12 @@ ui <- fluidPage(
                                       choices=NULL)),
                    column(2,
                           selectInput("taxa_filter_selection", 
-                                      "Select the group to filter", 
+                                      "Select the target group to filter", 
                                       choices=NULL))
                    
                    ),
                  actionButton("make_tree", "Create tree"),
+                 # TODO: help message
                  helpText("Help message"),
                  wellPanel(
                    plotOutput("tax_tree",
@@ -170,8 +172,9 @@ ui <- fluidPage(
                    ))
         )),
     
+###############################################################################
     # Graphics tab containing Biplot and Alpha Diversity plots
-    tabPanel("Graphics",
+    tabPanel("Function",
       value = "graph",
       # Division between Biplot and Alpha
       navlistPanel(

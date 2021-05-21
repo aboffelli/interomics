@@ -35,10 +35,13 @@ create_taxmap <- function(taxa, otu) {
         
         taxa_col[i,1] <- tax_line
     }
+
     colnames(taxa_col) <- "Taxonomy"
     
+    # Join the new column in the OTU table
     taxonomic_df <- cbind(otu, taxa_col)
-
+    
+    # Create the tax maps
     taxmap <- parse_tax_data(taxonomic_df,
                              class_cols="Taxonomy", 
                              class_sep=";")
@@ -48,10 +51,12 @@ create_taxmap <- function(taxa, otu) {
 
 # Function to subset the phylo object
 subset_func <- function(phylo, level, choice, t_or_s) {
+    # Taxa table
     if(t_or_s == "t") {
         # Change the column name
         positions <- colnames(phylo@tax_table@.Data)
         colnames(phylo@tax_table@.Data)[which(positions == level)] <- "sel_col"
+        # Change the target name
         phylo@tax_table@.Data[phylo@tax_table@.Data == choice] <- "choice"
         
         # Subset the object
@@ -60,20 +65,27 @@ subset_func <- function(phylo, level, choice, t_or_s) {
         # Change the column back
         positions <- colnames(phylo@tax_table@.Data)
         colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- level
+        # Change the target back
         phylo@tax_table@.Data[phylo@tax_table@.Data == "choice"] <- choice
     }
+    
+    # Sample table
     else {
+        # Change the column name
         positions <- colnames(phylo@sam_data)
         colnames(phylo@sam_data)[which(positions==level)] <- "sel_col" 
+        # Change the target name
         change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
         change[change==choice] <- "choice"
         phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
         
         phylo <- subset_samples(phylo, sel_col=="choice")
         
+        # Change the target back
         change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
         change[change=="choice"] <- choice
         phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
+        # Change the column back
         positions <- colnames(phylo@sam_data)
         colnames(phylo@sam_data)[which(positions=="sel_col")] <- level
     }
@@ -138,8 +150,10 @@ server <- function(input, output, session) {
         phylo <- create_phylo(taxa=taxa_df(),
                               otu=otu_df(),
                               sample=sample_df())
+        # TODO: subset more than one target
+        # TODO: option to subset != to the target.
         if(input$use_subset) {
-            # TODO: subset only works if there is no NA in the column, fix it
+            # TODO: FIX - subset only works if there is no NA in the column
             type <- toString(input$subset_type)
             level <- toString(input$subset_level)
             choice <- toString(input$subset_choice)
@@ -199,17 +213,18 @@ server <- function(input, output, session) {
     }, 
     rownames=TRUE)
     
-    # TODO: Observe event is subset_type, if this changes before data input the variables do not update
+    # TODO: FIX - Observe event is subset_type, if this changes before data input the variables do not update
     
     # Subset variables level
     observeEvent(input$subset_type, {
         req(taxa_df(), otu_df(), sample_df())
-    
+        # Taxa table
         if(toString(input$subset_type)=="Taxa") {
             updateSelectInput(session, "subset_level", 
                               choices=colnames(taxa_df()),
                               selected=FALSE)
         }
+        # Sample table
         else {
             updateSelectInput(session, "subset_level", 
                               choices=colnames(sample_df()),
@@ -221,11 +236,13 @@ server <- function(input, output, session) {
     observeEvent(input$subset_level, {
         req(input$subset_level)
         level <- toString(input$subset_level)
+        # Taxa table
         if(toString(input$subset_type)=="Taxa")
             updateSelectInput(session,
                               "subset_choice",
                               choices=unique(taxa_df()[,level]),
                               selected=FALSE)
+        # Sample table
         else {
             updateSelectInput(session,
                               "subset_choice",
@@ -243,12 +260,6 @@ server <- function(input, output, session) {
                              "sample_var", 
                              data=sample_df(), selected=FALSE)
         #Tax tree
-        updateSliderInput(session, 'abundance_filter',
-                          min=0, max=sum(
-                              rowSums(
-                                  otu_df()[,row.names(
-                                      sample_df())])
-                          ))
         updateSelectInput(session, 
                           "taxa_filter_level", 
                           choices=colnames(taxa_df()), selected=FALSE)
@@ -273,7 +284,7 @@ server <- function(input, output, session) {
                              data=sample_df(), selected=FALSE)
     })
     
-    
+###############################################################################
     # Abundance tab
     
     # Heatmap output
@@ -286,6 +297,7 @@ server <- function(input, output, session) {
 
         heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, 
                                       low="#66CCFF", high="#000033")
+        # Display plot
         ggplotly(heat_plot
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
                  )   
@@ -296,7 +308,8 @@ server <- function(input, output, session) {
     observeEvent(input$taxa_filter_level, {
         req(input$taxa_filter_level)
         level <- toString(input$taxa_filter_level)
-
+        
+        # Update the filter target
         updateSelectInput(session,
                           "taxa_filter_selection",
                           choices=unique(taxa_df()[,level]),
@@ -310,7 +323,7 @@ server <- function(input, output, session) {
         
         taxmap <- create_taxmap(taxa=taxa_df(), 
                                 otu=otu_df())
-
+        # Check if the filter is selected
         if(!is.null(input$taxa_filter_selection)){
             taxmap <- taxa::filter_taxa(taxmap,
                                   taxon_names==toString(
@@ -324,13 +337,14 @@ server <- function(input, output, session) {
         taxmap <- filter_obs(taxmap, "otu_counts",
                              !reads_filter, drop_taxa=TRUE)
         
+        # Display the tree
         heat_tree(taxmap,
                   node_label = taxon_names,
                   node_size = n_obs,
                   node_color=n_obs)
     })
     
-    
+###############################################################################
     # Graphics tab
     
     # Biplot output
@@ -347,6 +361,7 @@ server <- function(input, output, session) {
                                 shape=chosen_var[2]) +
             scale_shape(solid=FALSE)
         
+        # Display plot
         ggplotly(biplot
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")),
                  tooltip=c(chosen_var[1],
@@ -376,6 +391,7 @@ server <- function(input, output, session) {
                                    x=x,
                                    color=col,
                                    measures=input$alpha_measure_var)
+        # Display plot
         ggplotly(alpha_div 
                  + theme(plot.margin = unit(c(1, 1, 1, 1.5), "cm")),
                  tooltip=c(x, col, "value")
