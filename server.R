@@ -50,9 +50,9 @@ create_taxmap <- function(taxa, otu) {
 }
 
 # Function to subset the phylo object
-subset_func <- function(phylo, level, choice, t_or_s) {
+subset_func <- function(phylo, level, choice, taxa, remove) {
     # Taxa table
-    if(t_or_s == "t") {
+    if(taxa) {
         # Change the column name
         positions <- colnames(phylo@tax_table@.Data)
         colnames(phylo@tax_table@.Data)[which(positions == level)] <- "sel_col"
@@ -60,7 +60,8 @@ subset_func <- function(phylo, level, choice, t_or_s) {
         phylo@tax_table@.Data[phylo@tax_table@.Data == choice] <- "choice"
         
         # Subset the object
-        phylo <- subset_taxa(phylo, sel_col== "choice")
+        if(!remove) phylo <- subset_taxa(phylo, sel_col== "choice")
+        else phylo <- subset_taxa(phylo, sel_col!= "choice")
         
         # Change the column back
         positions <- colnames(phylo@tax_table@.Data)
@@ -79,7 +80,8 @@ subset_func <- function(phylo, level, choice, t_or_s) {
         change[change==choice] <- "choice"
         phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
         
-        phylo <- subset_samples(phylo, sel_col=="choice")
+        if(!remove) phylo <- subset_samples(phylo, sel_col=="choice")
+        else phylo <- subset_samples(phylo, sel_col!="choice")
         
         # Change the target back
         change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
@@ -150,25 +152,22 @@ server <- function(input, output, session) {
         phylo <- create_phylo(taxa=taxa_df(),
                               otu=otu_df(),
                               sample=sample_df())
+        
         # TODO: subset more than one target
-        # TODO: option to subset != to the target.
         if(input$use_subset) {
             # TODO: FIX - subset only works if there is no NA in the column
             type <- toString(input$subset_type)
             level <- toString(input$subset_level)
             choice <- toString(input$subset_choice)
-            if(type=="Taxa") {
-                phylo <- subset_func(phylo=phylo, 
-                                     level=level, 
-                                     choice=choice, 
-                                     "t")
-            }
-            else {
-                phylo <- subset_func(phylo=phylo, 
-                                     level=level, 
-                                     choice=choice, 
-                                     "s")
-            }
+            if (type == "Taxa") taxa <- TRUE
+            else taxa <- FALSE
+            if (input$subset_remove=="Select") remove <- FALSE
+            else remove <- TRUE
+            phylo <- subset_func(phylo=phylo, 
+                                 level=level, 
+                                 choice=choice, 
+                                 taxa=taxa,
+                                 remove=remove)
             
         }
         phylo

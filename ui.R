@@ -74,6 +74,10 @@ ui <- fluidPage(
           
           p(strong("Subset the data")),
           br(),
+          radioButtons("subset_remove",
+                       label=NULL,
+                       choices=c("Select",
+                                 "Remove")),
           
           div(style="display: inline-block; width: 32%",
               selectInput("subset_type",
