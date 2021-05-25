@@ -1,102 +1,3 @@
-library(shiny)
-library(metacoder)
-library(phyloseq)
-library(ggplot2)
-
-# Set a new theme for ggplot
-theme_set(theme_bw())
-
-# Function to create a phylo object using phyloseq
-create_phylo <- function(taxa, otu, sample) {
-    OTU <- otu_table(otu, taxa_are_rows=TRUE)
-    TAXA <- tax_table(taxa)
-    SAMPLE <- sample_data(sample)
-    phylo <- phyloseq(OTU, TAXA, SAMPLE)
-    return(phylo)
-}
-
-# Function to create a phylo object using phyloseq
-create_biplot <- function(phylo_object, fill, shape) {
-    phylo.ord <- ordinate(phylo_object, "NMDS", "bray")
-    biplot <- plot_ordination(phylo_object, phylo.ord, 
-                              type="split", color=fill, 
-                              shape=shape)
-    return(biplot)
-}
-
-# Function to generate the taxonomic tree.
-create_taxmap <- function(taxa, otu) {
-    # Create a taxonomy column
-    taxa_col <- as.data.frame(matrix(nrow=nrow(taxa), ncol=1))
-    for(i in 1:nrow(taxa)) {
-        tax_line <- toString(taxa[i,])
-        tax_line <- gsub(", NA", "", tax_line)
-        tax_line <- gsub(", ", ";", tax_line)
-        
-        taxa_col[i,1] <- tax_line
-    }
-
-    colnames(taxa_col) <- "Taxonomy"
-    
-    # Join the new column in the OTU table
-    taxonomic_df <- cbind(otu, taxa_col)
-    
-    # Create the tax maps
-    taxmap <- parse_tax_data(taxonomic_df,
-                             class_cols="Taxonomy", 
-                             class_sep=";")
-    names(taxmap$data) <- "otu_counts"
-    return(taxmap)
-}
-
-# Function to subset the phylo object
-subset_func <- function(phylo, level, choice, taxa, remove) {
-    # Taxa table
-    if(taxa) {
-        # Change the column name
-        positions <- colnames(phylo@tax_table@.Data)
-        colnames(phylo@tax_table@.Data)[which(positions == level)] <- "sel_col"
-        # Change the target name
-        phylo@tax_table@.Data[phylo@tax_table@.Data == choice] <- "choice"
-        
-        # Subset the object
-        if(!remove) phylo <- subset_taxa(phylo, sel_col== "choice")
-        else phylo <- subset_taxa(phylo, sel_col!= "choice")
-        
-        # Change the column back
-        positions <- colnames(phylo@tax_table@.Data)
-        colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- level
-        # Change the target back
-        phylo@tax_table@.Data[phylo@tax_table@.Data == "choice"] <- choice
-    }
-    
-    # Sample table
-    else {
-        # Change the column name
-        positions <- colnames(phylo@sam_data)
-        colnames(phylo@sam_data)[which(positions==level)] <- "sel_col" 
-        # Change the target name
-        change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
-        change[change==choice] <- "choice"
-        phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
-        
-        if(!remove) phylo <- subset_samples(phylo, sel_col=="choice")
-        else phylo <- subset_samples(phylo, sel_col!="choice")
-        
-        # Change the target back
-        change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
-        change[change=="choice"] <- choice
-        phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
-        # Change the column back
-        positions <- colnames(phylo@sam_data)
-        colnames(phylo@sam_data)[which(positions=="sel_col")] <- level
-    }
-        
-    return(phylo)
-}
-
-
-
 
 server <- function(input, output, session) {
     observeEvent(input$example, {
@@ -146,33 +47,7 @@ server <- function(input, output, session) {
         else GlobalPatterns@sam_data
     })
     
-    phylo <- reactive({
-        req(taxa_df(), otu_df(), sample_df())
-        
-        phylo <- create_phylo(taxa=taxa_df(),
-                              otu=otu_df(),
-                              sample=sample_df())
-        
-        # TODO: subset more than one target
-        if(input$use_subset) {
-            # TODO: FIX - subset only works if there is no NA in the column
-            type <- toString(input$subset_type)
-            level <- toString(input$subset_level)
-            choice <- toString(input$subset_choice)
-            if (type == "Taxa") taxa <- TRUE
-            else taxa <- FALSE
-            if (input$subset_remove=="Select") remove <- FALSE
-            else remove <- TRUE
-            phylo <- subset_func(phylo=phylo, 
-                                 level=level, 
-                                 choice=choice, 
-                                 taxa=taxa,
-                                 remove=remove)
-            
-        }
-        phylo
-    })
-
+    
     # Slidebar will react to change
     headnum <- eventReactive(input$rownum, {
         input$rownum
@@ -212,43 +87,163 @@ server <- function(input, output, session) {
     }, 
     rownames=TRUE)
     
-    # TODO: FIX - Observe event is subset_type, if this changes before data input the variables do not update
-    
-    # Subset variables level
-    observeEvent(input$subset_type, {
+    # Subset variables
+    observe({
         req(taxa_df(), otu_df(), sample_df())
+        for(var in subset_types) {
+            updateSelectInput(session, var,
+                              choices=c("Taxa", "Sample"),
+                              selected=FALSE)
+        }
+    })
+    # Subset variables level1
+    observeEvent(input$subset_type1, {
+        req(input$subset_type1)
         # Taxa table
-        if(toString(input$subset_type)=="Taxa") {
-            updateSelectInput(session, "subset_level", 
+        if(toString(input$subset_type1)=="Taxa") {
+            updateSelectInput(session, "subset_level1", 
                               choices=colnames(taxa_df()),
                               selected=FALSE)
         }
         # Sample table
         else {
-            updateSelectInput(session, "subset_level", 
+            updateSelectInput(session, "subset_level1", 
                               choices=colnames(sample_df()),
                               selected=FALSE)
         }
     })
     
-    # Subset variable choice
-    observeEvent(input$subset_level, {
-        req(input$subset_level)
-        level <- toString(input$subset_level)
+    # Subset variable choice1
+    observeEvent(input$subset_level1, {
+        req(input$subset_level1)
+        level <- toString(input$subset_level1)
         # Taxa table
-        if(toString(input$subset_type)=="Taxa")
+        if(toString(input$subset_type1)=="Taxa")
             updateSelectInput(session,
-                              "subset_choice",
+                              "subset_choice1",
                               choices=unique(taxa_df()[,level]),
                               selected=FALSE)
         # Sample table
         else {
             updateSelectInput(session,
-                              "subset_choice",
+                              "subset_choice1",
                               choices=unique(sample_df()[,level]),
                               selected=FALSE)
-            }
+        }
     })
+    
+    # Subset variables level2
+    observeEvent(input$subset_type2, {
+        req(input$subset_type2)
+        # Taxa table
+        if(toString(input$subset_type2)=="Taxa") {
+            updateSelectInput(session, "subset_level2", 
+                              choices=colnames(taxa_df()),
+                              selected=FALSE)
+        }
+        # Sample table
+        else {
+            updateSelectInput(session, "subset_level2", 
+                              choices=colnames(sample_df()),
+                              selected=FALSE)
+        }
+    })
+    
+    # Subset variable choice2
+    observeEvent(input$subset_level2, {
+        req(input$subset_level2)
+        level <- toString(input$subset_level2)
+        # Taxa table
+        if(toString(input$subset_type2)=="Taxa")
+            updateSelectInput(session,
+                              "subset_choice2",
+                              choices=unique(taxa_df()[,level]),
+                              selected=FALSE)
+        # Sample table
+        else {
+            updateSelectInput(session,
+                              "subset_choice2",
+                              choices=unique(sample_df()[,level]),
+                              selected=FALSE)
+        }
+    })
+    
+    # Subset variables level3
+    observeEvent(input$subset_type3, {
+        req(input$subset_type3)
+        # Taxa table
+        if(toString(input$subset_type3)=="Taxa") {
+            updateSelectInput(session, "subset_level3", 
+                              choices=colnames(taxa_df()),
+                              selected=FALSE)
+        }
+        # Sample table
+        else {
+            updateSelectInput(session, "subset_level3", 
+                              choices=colnames(sample_df()),
+                              selected=FALSE)
+        }
+    })
+    
+    # Subset variable choice3
+    observeEvent(input$subset_level3, {
+        req(input$subset_level3)
+        level <- toString(input$subset_level3)
+        # Taxa table
+        if(toString(input$subset_type3)=="Taxa")
+            updateSelectInput(session,
+                              "subset_choice3",
+                              choices=unique(taxa_df()[,level]),
+                              selected=FALSE)
+        # Sample table
+        else {
+            updateSelectInput(session,
+                              "subset_choice3",
+                              choices=unique(sample_df()[,level]),
+                              selected=FALSE)
+        }
+    })
+    
+    phylo <- reactive({
+        req(taxa_df(), otu_df(), sample_df())
+        
+        phylo <- create_phylo(taxa=taxa_df(),
+                              otu=otu_df(),
+                              sample=sample_df())
+        
+        # TODO: vectors with all subsetting options
+        if(input$use_subset) {
+            # TODO: FIX - subset only works if there is no NA in the column
+            subset_data <- list(c(type=toString(input$subset_type1), 
+                                  level=toString(input$subset_level1),
+                                  choice=toString(input$subset_choice1),
+                                  remove=input$subset_remove1),
+                                c(type=toString(input$subset_type2), 
+                                  level=toString(input$subset_level2),
+                                  choice=toString(input$subset_choice2),
+                                  remove=input$subset_remove2),
+                                c(type=toString(input$subset_type3), 
+                                  level=toString(input$subset_level3),
+                                  choice=toString(input$subset_choice3),
+                                  remove=input$subset_remove3))
+            
+            for(i in 1:3){
+                if(subset_data[[i]]["choice"]!=""){
+                    if (subset_data[[i]]["type"] == "Taxa") taxa <- TRUE
+                    else taxa <- FALSE
+                    if (subset_data[[i]]["remove"] == "Select") remove <- FALSE
+                    else remove <- TRUE
+                    
+                    phylo <- subset_func(phylo=phylo, 
+                                         level=subset_data[[i]]["level"], 
+                                         choice=subset_data[[i]]["choice"], 
+                                         taxa=taxa,
+                                         remove=remove)
+                    
+                }}}
+        phylo
+    })
+    
     
     # Update variable boxes when change tab
     observeEvent(input$tabswitch, {

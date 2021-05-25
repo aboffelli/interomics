@@ -74,27 +74,73 @@ ui <- fluidPage(
           
           p(strong("Subset the data")),
           br(),
-          radioButtons("subset_remove",
+          checkboxInput("use_subset", "Use subsetted data", FALSE),
+          br(),
+          
+          # Subset 1
+          radioButtons("subset_remove1",
                        label=NULL,
                        choices=c("Select",
                                  "Remove")),
           
           div(style="display: inline-block; width: 32%",
-              selectInput("subset_type",
+              selectInput("subset_type1",
                           "Select the table",
-                          choices=c("", "Taxa", "Sample"),
+                          choices=NULL,
                           width="100%")),
           div(style="display: inline-block; width: 32%",
-              selectInput("subset_level",
+              selectInput("subset_level1",
                           "Select the level", 
                           choices=NULL,
                           width="100%")),
           div(style="display: inline-block; width: 32%",
-              selectInput("subset_choice",
+              selectInput("subset_choice1",
                           "Select the target group", 
                           choices=NULL,
                           width="100%")),
-          checkboxInput("use_subset", "Use subsetted data", FALSE)
+          
+          # Subset 2
+          radioButtons("subset_remove2",
+                       label=NULL,
+                       choices=c("Select",
+                                 "Remove")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_type2",
+                          "Select the table",
+                          choices=NULL,
+                          width="100%")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_level2",
+                          "Select the level", 
+                          choices=NULL,
+                          width="100%")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_choice2",
+                          "Select the target group", 
+                          choices=NULL,
+                          width="100%")),
+          
+          # Subset 3
+          radioButtons("subset_remove3",
+                       label=NULL,
+                       choices=c("Select",
+                                 "Remove")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_type3",
+                          "Select the table",
+                          choices=NULL,
+                          width="100%")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_level3",
+                          "Select the level", 
+                          choices=NULL,
+                          width="100%")),
+          div(style="display: inline-block; width: 32%",
+              selectInput("subset_choice3",
+                          "Select the target group", 
+                          choices=NULL,
+                          width="100%"))
+          
           ),
         
         # Tables display
@@ -102,7 +148,7 @@ ui <- fluidPage(
           column(
             12,
             p(strong("OTU table")),
-            div(style = "height:200px; overflow-y:scroll",
+            div(style = "height:320px; overflow-y:scroll",
                 # Display the tables
                 tableOutput("otu_table"))
           ),
@@ -110,14 +156,14 @@ ui <- fluidPage(
             12,
             hr(),
             p(strong("Taxa table")),
-            div(style = "height:200px; overflow-y:scroll",
+            div(style = "height:320px; overflow-y:scroll",
                 tableOutput("taxa_table"))
           ),
           column(
             12,
             hr(),
             p(strong("Sample table")),
-            div(style = "height:200px; overflow-y:scroll",
+            div(style = "height:320px; overflow-y:scroll",
                 tableOutput("sample_table"))
             ))
           ))
