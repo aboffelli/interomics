@@ -2,7 +2,7 @@
 
 ## About the program
 
-
+***Interomics*** is a application created to facilitate the visualization of metagenomic data. It is an user-friendly environment, where the user can easily: subset the data that is being calculated; select the variables that will be used to generate the plot, changing it instantly; visualize interactive plots – heatmap, biplot, alpha-diversity – where you can obtain information by hovering the mouse over the plot, zoom in or out, isolate or hide groups in the plot based on specific characteristics; generate a taxonomic tree.   
 
 ## Installation
 
@@ -28,10 +28,12 @@ BiocManager::install("phyloseq", ask=FALSE)
 
 ### Running the program
 
-After the installation of the necessary packages, make sure that both files (*ui.R* and *server.R*) are in the same directory. You can run the program with the following line in the R console.
+The program consists in three files – *ui.R*, *server.R*, and *global.R* – that must be stored together in the same directory.
+
+After the installation of the necessary packages and making sure that the three files (*ui.R*, *server.R*, and *global.R*) are together, you can run the program with the following line in the R console.
 
 ```R
-# The path must point to the whole directory. The path below is an example, you may need to change it according to where the files are saved.
+# The path below is an example, you may need to change it according to where the files are saved. It must point to the whole directory containing the three files mentioned before. 
 shiny::runApp("C:/User/Example/Interomics")
 ```
 
@@ -45,11 +47,23 @@ The files can be uploaded in the initial page (File Upload tab), where three fil
 - Taxonomic table for each OTU. The first column must contain the OTU name/number. The first row must contain the taxonomic levels.
 - Sample data. The first column must contain the sample names. The first row will be read as a header.
 
-The accepted formats are: text (txt), comma-separated-values (csv). The type of separator can be defined in the File Upload page, the options are tab, comma, and semicolon. Each file will be loaded in the right panel, where the number of rows displayed can be controlled with the slider in the left panel.
+The accepted formats are: plain-text (txt), comma-separated-values (csv). The type of separator can be defined in the File Upload page, the options are tab, comma, and semicolon. Each file will be loaded in the right panel, where the number of rows displayed can be controlled with the slider in the left panel.
 
 It is possible to load an example dataset selecting the checkbox under the slider. When selected, the three example tables will be loaded and displayed.
 
-All the plots can only be generated after uploading all three files or using the example dataset. When all tables are loaded correctly you can continue for the Abundance and Graphics tabs. 
+### Subsetting the data (optional)
+
+The subset will affecting all the plots, with the exception of the Taxonomic Tree, that has its own filtering options.
+
+Select if the target group will be isolated or removed from the data in the radio buttons above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
+
+You can have up to three subsets simultaneously. You can use any box set, however, keep in mind that the subset will follow the order in the boxes. So, be careful of isolating a group that was removed in a previous box set.
+
+To use the subsetted data, select the checkbox "Use subsetted data". The program will use the whole data if this checkbox is not selected, even if you selected the groups in the boxes.
+
+
+
+The plots can only be generated after uploading all three files or using the example dataset. When all tables are loaded correctly and subsetted (optional), you can continue for the Abundance and Graphics tabs.
 
 
 
@@ -59,14 +73,22 @@ All the plots can only be generated after uploading all three files or using the
 
 To load the heatmap, it is necessary to select a label for the samples. 
 
-## Graphics
+The heatmap is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the sample name, the OTU number, and the abundance. In the top right corner of the plot you will find some command buttons, including: save the plot as a png image, selection box, zoom in and out, reset axes, etc.
 
-In the Graphics tab you can visualize the Biplot and the Alpha-Diversity graphics.
+### Taxonomic Tree
+
+In the Taxonomic Tree tab, you will find a slide bar where you can select the minimum abundance to be considered in the tree, as well as a filtering option similar to the subset options. To use the filter option, first select the taxonomy level that the target group is located. As the data can be heavy, the image will only be created after clicking the button "Create tree". The image may take a while to be displayed.
+
+## Function
 
 ### Biplot
 
 Both variables, color and shape, are required to create the Biplot. You can choose any combination of variables.
 
+The biplot is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the selected variables and the positions NMDS1 and NMDS2. You can hide a group by clicking on the legend corresponding to that group in the right side, or isolate a group by double clicking in the legend corresponding to the group. In the top right corner of the plot you will find some command buttons, including: save the plot as a png image, selection box, zoom in and out, reset axes, etc.
+
 ### Alpha-Diversity
 
-Only the "X" variable and the "Measures" are required for the Alpha-Diversity plot. The "Color" variable is optional, if not selected, all samples will be colored black. You can select multiple types of measure, each of them will be displayed side by side.
+Only the "X" variable and the "Measures" are required for the Alpha-Diversity plot. The "Color" and "Shape" variables are optional, if not selected, all samples will be colored black and shaped as circles. You can select multiple types of measure, each of them will be displayed side by side.
+
+The alpha-diversity plot is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the selected variables and value of the measure selected. You can hide a group by clicking on the legend corresponding to that group in the right side, or isolate a group by double clicking in the legend corresponding to the group. In the top right corner of the plot you will find some command buttons, including: save the plot as a png image, selection box, zoom in and out, reset axes, etc.
