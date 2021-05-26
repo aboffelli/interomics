@@ -214,17 +214,17 @@ server <- function(input, output, session) {
         # TODO: vectors with all subsetting options
         if(input$use_subset) {
             # TODO: FIX - subset only works if there is no NA in the column
-            subset_data <- list(c(type=toString(input$subset_type1), 
-                                  level=toString(input$subset_level1),
-                                  choice=toString(input$subset_choice1),
+            subset_data <- list(c(type=input$subset_type1, 
+                                  level=input$subset_level1,
+                                  choice=input$subset_choice1,
                                   remove=input$subset_remove1),
-                                c(type=toString(input$subset_type2), 
-                                  level=toString(input$subset_level2),
-                                  choice=toString(input$subset_choice2),
+                                c(type=input$subset_type2, 
+                                  level=input$subset_level2,
+                                  choice=input$subset_choice2,
                                   remove=input$subset_remove2),
-                                c(type=toString(input$subset_type3), 
-                                  level=toString(input$subset_level3),
-                                  choice=toString(input$subset_choice3),
+                                c(type=input$subset_type3, 
+                                  level=input$subset_level3,
+                                  choice=input$subset_choice3,
                                   remove=input$subset_remove3))
             
             for(i in 1:3){
@@ -262,20 +262,19 @@ server <- function(input, output, session) {
         # Create a df with all sample and taxa columns
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
-        updateVarSelectInput(session,
-                             "fill_var", 
-                             data = x, selected=FALSE)
-        updateVarSelectInput(session,
-                             "shape_var", 
-                             data = x, selected=FALSE)
+        for (var in c("fill_var", "shape_var")) {
+            updateVarSelectInput(session,
+                                 var, 
+                                 data = x, selected=FALSE)
+        }
         
         # Alpha diversity
+        for (var in c("alpha_x_var", "alpha_col_var", "alpha_shape_var")) {
         updateVarSelectInput(session,
-                             "alpha_x_var",
+                             var,
                              data=sample_df(), selected=FALSE)
-        updateVarSelectInput(session,
-                             "alpha_col_var",
-                             data=sample_df(), selected=FALSE)
+        }
+        
     })
     
 ###############################################################################
@@ -309,10 +308,9 @@ server <- function(input, output, session) {
                           choices=unique(taxa_df()[,level]),
                           selected=FALSE)
     })
-    
-    # Tree display
-    output$tax_tree <- renderPlot({
-        req(input$make_tree)
+    # Create the tree object
+    # eventReactive isolate the selection boxes, so the tree will be created only after clicking the button.
+    tax_tree <- eventReactive(input$make_tree, {
         filter_num <- input$abundance_filter
         
         taxmap <- create_taxmap(taxa=taxa_df(), 
@@ -320,9 +318,9 @@ server <- function(input, output, session) {
         # Check if the filter is selected
         if(!is.null(input$taxa_filter_selection)){
             taxmap <- taxa::filter_taxa(taxmap,
-                                  taxon_names==toString(
-                                      input$taxa_filter_selection),
-                                  subtaxa=TRUE)
+                                        taxon_names==toString(
+                                            input$taxa_filter_selection),
+                                        subtaxa=TRUE)
         }
         
         reads_filter <- rowSums(
@@ -336,6 +334,14 @@ server <- function(input, output, session) {
                   node_label = taxon_names,
                   node_size = n_obs,
                   node_color=n_obs)
+    })
+    
+    # Tree display
+    output$tax_tree <- renderPlot({
+        req(tax_tree())
+        
+        tax_tree()
+        
     })
     
 ###############################################################################
@@ -379,16 +385,24 @@ server <- function(input, output, session) {
         
         # Color default will be black, unless selected by the user.
         col <- NULL
-        if(!is.null(input$alpha_col_var)) col <- toString(input$alpha_col_var)
+        if(!is.null(input$alpha_col_var)) {
+            col <- toString(input$alpha_col_var)
+        }
+        # Shape defaul will be 19 (circle)
+        shape <- NULL
+        if(!is.null(input$alpha_shape_var)) {
+            shape <- toString(input$alpha_shape_var)
+        }
         
         alpha_div <- plot_richness(Alpha,
                                    x=x,
                                    color=col,
+                                   shape=shape,
                                    measures=input$alpha_measure_var)
         # Display plot
         ggplotly(alpha_div 
                  + theme(plot.margin = unit(c(1, 1, 1, 1.5), "cm")),
-                 tooltip=c(x, col, "value")
+                 tooltip=c(x, col, shape, "value")
                  )
     })
 }

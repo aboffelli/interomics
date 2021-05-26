@@ -72,8 +72,10 @@ ui <- fluidPage(
           checkboxInput("example", "Use an example dataset", FALSE),
           br(),
           
+          hr(),
           p(strong("Subset the data")),
-          br(),
+          helpText("Use this option to filter the data. You can either isole or remove the chosen groups."),
+          helpText("All plots will be affected, except the Taxonomic Tree."),
           checkboxInput("use_subset", "Use subsetted data", FALSE),
           br(),
           
@@ -170,7 +172,7 @@ ui <- fluidPage(
       ),
     
 ###############################################################################
-    # Abundance tab containing Heatmap and possibly a taxonomic tree or barplot.
+    # Abundance tab containing Heatmap and taxonomic tree.
     tabPanel("Abundance",
       value = "taxa",
       # Division between heatmap and tax tree
@@ -215,10 +217,10 @@ ui <- fluidPage(
                    ),
                  actionButton("make_tree", "Create tree"),
                  # TODO: help message
-                 helpText("Help message"),
+                 helpText("You can choose any level to filter, however the filtering is optional. To create the tree, click in the button above. The image may take some time to be created."),
                  wellPanel(
                    plotOutput("tax_tree",
-                              height="1000px")
+                              height="1500px")
                    ))
         )),
     
@@ -257,6 +259,10 @@ ui <- fluidPage(
                    column(2,
                           varSelectInput("alpha_col_var",
                                          "Select the color variable",
+                                         data=FALSE)),
+                   column(2,
+                          varSelectInput("alpha_shape_var",
+                                         "Select the shape variable",
                                          data=FALSE)),
                    column(2,
                           selectInput("alpha_measure_var", 
