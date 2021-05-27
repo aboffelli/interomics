@@ -150,7 +150,7 @@ ui <- fluidPage(
           column(
             12,
             p(strong("OTU table")),
-            div(style = "height:320px; overflow-y:scroll",
+            div(style = "height:350px; overflow-y:scroll",
                 # Display the tables
                 tableOutput("otu_table"))
           ),
@@ -158,14 +158,14 @@ ui <- fluidPage(
             12,
             hr(),
             p(strong("Taxa table")),
-            div(style = "height:320px; overflow-y:scroll",
+            div(style = "height:350px; overflow-y:scroll",
                 tableOutput("taxa_table"))
           ),
           column(
             12,
             hr(),
             p(strong("Sample table")),
-            div(style = "height:320px; overflow-y:scroll",
+            div(style = "height:350px; overflow-y:scroll",
                 tableOutput("sample_table"))
             ))
           ))
