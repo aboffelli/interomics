@@ -33,7 +33,8 @@ The program consists in three files – *ui.R*, *server.R*, and *global.R* – t
 After the installation of the necessary packages and making sure that the three files (*ui.R*, *server.R*, and *global.R*) are together, you can run the program with the following line in the R console.
 
 ```R
-# The path below is an example, you may need to change it according to where the files are saved. It must point to the whole directory containing the three files mentioned before. 
+# The path below is an example, you may need to change it according to where the files are saved. 
+# It must point to the whole directory containing the three files mentioned before. 
 shiny::runApp("C:/User/Example/Interomics")
 ```
 
@@ -53,13 +54,13 @@ It is possible to load an example dataset selecting the checkbox under the slide
 
 ### Subsetting the data (optional)
 
-The subset will affecting all the plots, with the exception of the Taxonomic Tree, that has its own filtering options.
+The subset will affect all the plots, with the exception of the Taxonomic Tree, that has its own filtering options.
 
-Select if the target group will be isolated or removed from the data in the radio buttons above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
+First, select if the target group will be isolated or removed from the data, using the radio buttons above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
 
-You can have up to three subsets simultaneously. You can use any box set, however, keep in mind that the subset will follow the order in the boxes. So, be careful of isolating a group that was removed in a previous box set.
+You can have up to three subsets simultaneously. You can use any box set, however, keep in mind that the subset will follow the order of the boxes. So, be careful of isolating a group that was removed in a previous box set.
 
-To use the subsetted data, select the checkbox "Use subsetted data". The program will use the whole data if this checkbox is not selected, even if you selected the groups in the boxes.
+To use the subsetted data, select the checkbox "Use subsetted data". The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes.
 
 
 
@@ -78,6 +79,8 @@ The heatmap is interactive, which means that you can zoom in selecting an area i
 ### Taxonomic Tree
 
 In the Taxonomic Tree tab, you will find a slide bar where you can select the minimum abundance to be considered in the tree, as well as a filtering option similar to the subset options. To use the filter option, first select the taxonomy level that the target group is located. As the data can be heavy, the image will only be created after clicking the button "Create tree". The image may take a while to be displayed.
+
+To download the taxonomic tree in pdf format, click the button "Download".  
 
 ## Function
 
