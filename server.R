@@ -5,6 +5,7 @@ server <- function(input, output, session) {
     })
     
     # Upload tab
+    # TODO: the taxa table must have only the taxa information, so there will be no indexing of the table.
     taxa_df <- reactive({
         if(!input$example) {
             req(input$taxa)
@@ -323,17 +324,15 @@ server <- function(input, output, session) {
                                         subtaxa=TRUE)
         }
         
-        reads_filter <- rowSums(
-            taxmap$data$otu_counts[,row.names(sample_df())]) < filter_num
-        
-        taxmap <- filter_obs(taxmap, "otu_counts",
-                             !reads_filter, drop_taxa=TRUE)
+        taxmap <- taxa::filter_taxa(taxmap, n_obs>=filter_num)
         
         # Display the tree
         heat_tree(taxmap,
                   node_label = taxon_names,
                   node_size = n_obs,
-                  node_color=n_obs)
+                  node_color=n_obs,
+                  node_size_range = c(0.005, 0.05),
+                  node_label_size_range = c(0.008, 0.04))
     })
     
     # Tree display
@@ -343,6 +342,16 @@ server <- function(input, output, session) {
         tax_tree()
         
     })
+    
+    # TODO: download Taxa tree
+    output$download_tree <- downloadHandler(
+        filename="taxa_tree.pdf",
+        content=function(file){
+            pdf(file, width=12, height=10)
+            print(tax_tree())
+            dev.off()
+        })
+    
     
 ###############################################################################
     # Graphics tab

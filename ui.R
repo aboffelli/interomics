@@ -74,7 +74,7 @@ ui <- fluidPage(
           
           hr(),
           p(strong("Subset the data")),
-          helpText("Use this option to filter the data. You can either isole or remove the chosen groups."),
+          helpText("Use this option to filter the data. You can either isolate or remove the chosen groups."),
           helpText("All plots will be affected, except the Taxonomic Tree."),
           checkboxInput("use_subset", "Use subsetted data", FALSE),
           br(),
@@ -202,7 +202,7 @@ ui <- fluidPage(
                    sliderInput("abundance_filter", 
                                "Select the minimum abundance to display", 
                                min=0, 
-                               max=1000, 
+                               max=100, 
                                value=0, 
                                width='100%')),
                    column(2,
@@ -216,6 +216,7 @@ ui <- fluidPage(
                    
                    ),
                  actionButton("make_tree", "Create tree"),
+                 downloadButton("download_tree"),
                  # TODO: help message
                  helpText("You can choose any level to filter, however the filtering is optional. To create the tree, click in the button above. The image may take some time to be created."),
                  wellPanel(
