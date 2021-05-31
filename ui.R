@@ -27,7 +27,7 @@ ui <- fluidPage(
             "otu",
             "Choose a OTU counts table file",
             multiple = FALSE,
-            accept = c("text/csv", ".csv", 
+            accept = c("text/csv", ".csv", ".tab", ".tsv", 
                        "text/comma-separated-values,text/plain")
           ),
           
@@ -69,7 +69,7 @@ ui <- fluidPage(
           ),
           
           # Checkbox that loads the example data
-          checkboxInput("example", "Use an example dataset", FALSE),
+          checkboxInput("example", "Load an example dataset", FALSE),
           br(),
           
           hr(),
@@ -189,7 +189,7 @@ ui <- fluidPage(
                                          data=FALSE),
                           )
                    ),
-                 helpText("The selection is required to load the plot and defines the label under each sample"),
+                 helpText("The selection is required to load the plot and defines the label under each sample."),
                  # Heatmap display
                  wellPanel(
                    plotlyOutput("heat_plot",
@@ -217,7 +217,6 @@ ui <- fluidPage(
                    ),
                  actionButton("make_tree", "Create tree"),
                  downloadButton("download_tree"),
-                 # TODO: help message
                  helpText("You can choose any level to filter, however the filtering is optional. To create the tree, click in the button above. The image may take some time to be created."),
                  wellPanel(
                    plotOutput("tax_tree",
@@ -226,7 +225,7 @@ ui <- fluidPage(
         )),
     
 ###############################################################################
-    # Graphics tab containing Biplot and Alpha Diversity plots
+    # Function tab containing Biplot and Alpha Diversity plots
     tabPanel("Function",
       value = "graph",
       # Division between Biplot and Alpha

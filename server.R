@@ -212,7 +212,6 @@ server <- function(input, output, session) {
                               otu=otu_df(),
                               sample=sample_df())
         
-        # TODO: vectors with all subsetting options
         if(input$use_subset) {
             # TODO: FIX - subset only works if there is no NA in the column
             subset_data <- list(c(type=input$subset_type1, 
@@ -343,7 +342,7 @@ server <- function(input, output, session) {
         
     })
     
-    # TODO: download Taxa tree
+    # Download taxa tree in pdf
     output$download_tree <- downloadHandler(
         filename="taxa_tree.pdf",
         content=function(file){

@@ -48,9 +48,9 @@ The files can be uploaded in the initial page (File Upload tab), where three fil
 - Taxonomic table for each OTU. The first column must contain the OTU name/number. The first row must contain the taxonomic levels.
 - Sample data. The first column must contain the sample names. The first row will be read as a header.
 
-The accepted formats are: plain-text (txt), comma-separated-values (csv). The type of separator can be defined in the File Upload page, the options are tab, comma, and semicolon. Each file will be loaded in the right panel, where the number of rows displayed can be controlled with the slider in the left panel.
+The accepted formats are: plain-text (txt), comma-separated-values (csv), tab-delimited (tab/tsv). The type of separator can be defined in the File Upload page, the options are tab, comma, and semicolon. Each file will be loaded in the right panel, where the number of rows displayed can be controlled with the slider in the left panel.
 
-It is possible to load an example dataset selecting the checkbox under the slider. When selected, the three example tables will be loaded and displayed.
+It is possible to load an example dataset selecting the checkbox "Load an example dataset" under the slider. When selected, the three example tables will be loaded and displayed.
 
 ### Subsetting the data (optional)
 
@@ -58,13 +58,13 @@ The subset will affect all the plots, with the exception of the Taxonomic Tree, 
 
 First, select if the target group will be isolated or removed from the data, using the radio buttons above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
 
-You can have up to three subsets simultaneously. You can use any box set, however, keep in mind that the subset will follow the order of the boxes. So, be careful of isolating a group that was removed in a previous box set.
+You can have up to three subsets simultaneously. You can use any box set, however, keep in mind that the subset will follow the order in the screen. So, be careful of isolating a group that was removed in a previous box set.
 
 To use the subsetted data, select the checkbox "Use subsetted data". The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes.
 
 
 
-The plots can only be generated after uploading all three files or using the example dataset. When all tables are loaded correctly and subsetted (optional), you can continue for the Abundance and Graphics tabs.
+The plots can only be generated after uploading all three files or using the example dataset. After all tables are loaded correctly and subsetted (optional), you can continue for the Abundance and Function tabs.
 
 
 
@@ -72,13 +72,13 @@ The plots can only be generated after uploading all three files or using the exa
 
 ### Heatmap
 
-To load the heatmap, it is necessary to select a label for the samples. 
+To load the heatmap, it is necessary to select a label for the samples.
 
-The heatmap is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the sample name, the OTU number, and the abundance. In the top right corner of the plot you will find some command buttons, including: save the plot as a png image, selection box, zoom in and out, reset axes, etc.
+The heatmap is interactive, which means that you can zoom in by selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the sample name, the OTU number, and the abundance. In the top right corner of the plot you will find some command buttons, including: save the plot as a png image, selection box, zoom in and out, reset axes, etc.
 
 ### Taxonomic Tree
 
-In the Taxonomic Tree tab, you will find a slide bar where you can select the minimum abundance to be considered in the tree, as well as a filtering option similar to the subset options. To use the filter option, first select the taxonomy level that the target group is located. As the data can be heavy, the image will only be created after clicking the button "Create tree". The image may take a while to be displayed.
+In the Taxonomic Tree tab, you will find a slide bar where you can select the minimum abundance to be considered in the tree, as well as a filtering option similar to the subset area. To use the filter option, first select the taxonomy level that the target group is located, all the possible groups in that level will be available to selection in the next box. As the data can be heavy, the image will only be created after clicking the button "Create tree". The image may take a while to be displayed.
 
 To download the taxonomic tree in pdf format, click the button "Download".  
 
