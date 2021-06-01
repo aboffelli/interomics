@@ -3,6 +3,7 @@ library(plotly)
 library(metacoder)
 library(phyloseq)
 library(ggplot2)
+library(DT)
 
 # Set a new theme for ggplot
 theme_set(theme_bw())
@@ -97,4 +98,3 @@ subset_func <- function(phylo, level, choice, taxa, remove) {
 }
 
 subset_types <- c("subset_type1", "subset_type2", "subset_type3")
-

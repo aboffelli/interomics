@@ -47,46 +47,43 @@ server <- function(input, output, session) {
         # Use example data
         else GlobalPatterns@sam_data
     })
-    
-    
-    # Slidebar will react to change
-    headnum <- eventReactive(input$rownum, {
-        input$rownum
-    })
-    
-    output$taxa_table <- renderTable({
-        if(!input$example) {
-            req(input$taxa)
-            # display the file table
-            head(taxa_df(), n = headnum())
-            }
-        else    # Display the example table
-            head(taxa_df(), n = headnum())
+
+    output$taxa_table <- DT::renderDataTable({
+        req(phylo())
+        phylo()@tax_table
         },
         rownames=TRUE)
             
     
-    output$otu_table <- renderTable({
-        if(!input$example) {
-            req(input$otu)
-            # display the file table
-            head(otu_df(), n = headnum())
-            }
-        else    # Display the example table
-            head(otu_df(), n=headnum())
-        }, 
-        rownames=TRUE)
+    output$otu_table <- DT::renderDataTable({
+        req(phylo())
+        phylo()@otu_table
+    }, rownames=TRUE)
     
-    output$sample_table <- renderTable({
-        if(!input$example) {
-            req(input$sample)
-            # display the file table
-            head(sample_df(), n = headnum())
-            }
-        else    # Display the example table
-            head(as.matrix(sample_df()), n=headnum())
-    }, 
-    rownames=TRUE)
+    output$sample_table <- DT::renderDataTable({
+        req(phylo())
+        phylo()@sam_data
+    }, rownames=TRUE)
+    
+    #Download tables
+    output$download_subset <- downloadHandler(
+        filename="interomics_tables.tar",
+        content=function(filename) {
+            
+            write.table(phylo()@tax_table, file="taxa_table.txt",
+                        sep="\t", quote=FALSE, na="", col.names=NA)
+            write.table(phylo()@otu_table, file="otu_table.txt",
+                        sep="\t", quote=FALSE, na="", col.names=NA)
+            write.table(phylo()@sam_data, file="sample_table.txt",
+                        sep="\t", quote=FALSE, na="", col.names=NA)
+            
+            tar(filename, files=c("taxa_table.txt", 
+                                      "otu_table.txt", 
+                                      "sample_table.txt"))
+            file.remove(c("taxa_table.txt", 
+                          "otu_table.txt", 
+                          "sample_table.txt"))
+        })
     
     # Subset variables
     observe({
@@ -280,21 +277,37 @@ server <- function(input, output, session) {
 ###############################################################################
     # Abundance tab
     
-    # Heatmap output
-    output$heat_plot <- renderPlotly({
+    # Heatmap object
+    heat_plot <- reactive({
         # only works after selecting the sample label
         req(input$sample_var)
         
         chosen_var <- toString(input$sample_var)
         phylo <- phylo()
-
+        
         heat_plot <- plot_heatmap(phylo, sample.label=chosen_var, 
-                                      low="#66CCFF", high="#000033")
+                                  low="#66CCFF", high="#000033", 
+                                  na.value="white")
+    })
+    
+    # Heatmap display
+    output$heat_plot <- renderPlotly({
+        req(heat_plot())
+        
         # Display plot
-        ggplotly(heat_plot
+        ggplotly(heat_plot()
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
                  )   
     })
+    
+    # Heatmap download
+    output$download_heatmap <- downloadHandler(
+        filename="heatmap.pdf",
+        content=function(file){
+            pdf(file, width=12, height=10)
+            print(heat_plot())
+            dev.off()
+        })
     
     # Taxonomy tree tab
     # Taxa filter
@@ -355,12 +368,12 @@ server <- function(input, output, session) {
 ###############################################################################
     # Graphics tab
     
-    # Biplot output
-    output$biplot <- renderPlotly({
+    # Biplot object
+    biplot <- reactive({
         # only works after selecting fill and shape
         req(input$fill_var, input$shape_var)
         chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
-
+        
         phylo <- phylo()
         
         
@@ -368,9 +381,12 @@ server <- function(input, output, session) {
                                 fill=chosen_var[1], 
                                 shape=chosen_var[2]) +
             scale_shape(solid=FALSE)
-        
-        # Display plot
-        ggplotly(biplot
+    })
+    # Display biplot
+    output$biplot <- renderPlotly({
+        req(biplot())
+        chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
+        ggplotly(biplot()
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")),
                  tooltip=c(chosen_var[1],
                            chosen_var[2], 
@@ -378,14 +394,22 @@ server <- function(input, output, session) {
                            "NMDS2"))
     })
     
-    # Alpha-diversity output
-    output$alpha <- renderPlotly({
+    # Biplot download
+    output$download_biplot <- downloadHandler(
+        filename="biplot.pdf",
+        content=function(file){
+            pdf(file, width=12, height=10)
+            print(biplot())
+            dev.off()
+        })
+    
+    
+    # Alpha-diversity object
+    alpha_div <- reactive({
         # Only works after selecting measure and x.
         req(input$alpha_measure_var, input$alpha_x_var)
         
-        phylo <- create_phylo(taxa=taxa_df(), 
-                              otu=otu_df(),
-                              sample=sample_df())
+        phylo <- phylo()
         
         Alpha <- prune_taxa(taxa_sums(phylo) > 10, phylo) 
         
@@ -407,10 +431,37 @@ server <- function(input, output, session) {
                                    color=col,
                                    shape=shape,
                                    measures=input$alpha_measure_var)
+    })
+    
+    # Display alpha-diversity
+    output$alpha <- renderPlotly({
+        req(alpha_div())
+        x <- toString(input$alpha_x_var)
+        
+        # Color default will be black, unless selected by the user.
+        col <- NULL
+        if(!is.null(input$alpha_col_var)) {
+            col <- toString(input$alpha_col_var)
+        }
+        # Shape defaul will be 19 (circle)
+        shape <- NULL
+        if(!is.null(input$alpha_shape_var)) {
+            shape <- toString(input$alpha_shape_var)
+        }
+        
         # Display plot
-        ggplotly(alpha_div 
+        ggplotly(alpha_div() 
                  + theme(plot.margin = unit(c(1, 1, 1, 1.5), "cm")),
                  tooltip=c(x, col, shape, "value")
                  )
     })
+    
+    # Alpha-diversity download
+    output$download_alpha <- downloadHandler(
+        filename="alpha_diversity.pdf",
+        content=function(file){
+            pdf(file, width=12, height=10)
+            print(alpha_div())
+            dev.off()
+        })
 }

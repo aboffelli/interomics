@@ -22,6 +22,16 @@ ui <- fluidPage(
       value = "upload",
       sidebarLayout(
         sidebarPanel(
+          # radio buttons for separator
+          radioButtons("sep",
+                       "Separator",
+                       choices = c(
+                         Tab = "\t",
+                         Comma = ",",
+                         Semicolon = ";"),
+                       selected = "\t"
+          ),
+          
           # OTU table input box
           fileInput(
             "otu",
@@ -47,25 +57,6 @@ ui <- fluidPage(
             multiple = FALSE,
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
-          ),
-          
-          # radio buttons for separator
-          radioButtons("sep",
-                       "Separator",
-                       choices = c(
-                         Tab = "\t",
-                         Comma = ",",
-                         Semicolon = ";"),
-                       selected = "\t"
-          ),
-          
-          # slider for number of rows to display
-          sliderInput(
-            "rownum",
-            "Number of rows to display",
-            value = 10,
-            min = 1,
-            max = 50
           ),
           
           # Checkbox that loads the example data
@@ -141,9 +132,11 @@ ui <- fluidPage(
               selectInput("subset_choice3",
                           "Select the target group", 
                           choices=NULL,
-                          width="100%"))
+                          width="100%")),
           
+          downloadButton("download_subset", "Download subsetted tables")
           ),
+        
         
         # Tables display
         mainPanel(fluidRow(
@@ -152,21 +145,21 @@ ui <- fluidPage(
             p(strong("OTU table")),
             div(style = "height:350px; overflow-y:scroll",
                 # Display the tables
-                tableOutput("otu_table"))
+                DT::dataTableOutput("otu_table"))
           ),
           column(
             12,
             hr(),
             p(strong("Taxa table")),
             div(style = "height:350px; overflow-y:scroll",
-                tableOutput("taxa_table"))
+                DT::dataTableOutput("taxa_table"))
           ),
           column(
             12,
             hr(),
             p(strong("Sample table")),
             div(style = "height:350px; overflow-y:scroll",
-                tableOutput("sample_table"))
+                DT::dataTableOutput("sample_table"))
             ))
           ))
       ),
@@ -190,6 +183,7 @@ ui <- fluidPage(
                           )
                    ),
                  helpText("The selection is required to load the plot and defines the label under each sample."),
+                 downloadButton("download_heatmap"),
                  # Heatmap display
                  wellPanel(
                    plotlyOutput("heat_plot",
@@ -245,6 +239,7 @@ ui <- fluidPage(
                                          data=FALSE))
                  ),
                  helpText("Both, color and shape variables, are required to load the plot."),
+                 downloadButton("download_biplot"),
                  # Plot display
                  wellPanel(plotlyOutput("biplot",
                                         height = "750px"))),
@@ -273,6 +268,7 @@ ui <- fluidPage(
                                       multiple=TRUE))
                  ),
                    helpText("The X variable and the measure are required. More then one measure can be selected at the same time."),
+                 downloadButton("download_alpha"),
                  
                  # Plot display
                  wellPanel(plotlyOutput("alpha",
