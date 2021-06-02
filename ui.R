@@ -1,5 +1,3 @@
-library(shiny)
-library(plotly)
 
 ui <- fluidPage(
   # Application title in the top of the page
