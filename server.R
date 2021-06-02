@@ -226,16 +226,22 @@ server <- function(input, output, session) {
             
             for(i in 1:3){
                 if(subset_data[[i]]["choice"]!=""){
-                    if (subset_data[[i]]["type"] == "Taxa") taxa <- TRUE
-                    else taxa <- FALSE
                     if (subset_data[[i]]["remove"] == "Select") remove <- FALSE
                     else remove <- TRUE
                     
-                    phylo <- subset_func(phylo=phylo, 
-                                         level=subset_data[[i]]["level"], 
-                                         choice=subset_data[[i]]["choice"], 
-                                         taxa=taxa,
-                                         remove=remove)
+                    if (subset_data[[i]]["type"] == "Taxa") {
+                        phylo <- taxa_subset(
+                            phylo,
+                            level=subset_data[[i]]["level"],
+                            choice=subset_data[[i]]["choice"],
+                            remove=remove)
+                    }
+                    else 
+                        phylo <- sample_subset(
+                            phylo=phylo, 
+                            level=subset_data[[i]]["level"],
+                            choice=subset_data[[i]]["choice"],
+                            remove=remove)
                     
                 }}}
         phylo

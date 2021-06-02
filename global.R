@@ -51,50 +51,24 @@ create_taxmap <- function(taxa, otu) {
     return(taxmap)
 }
 
-# Function to subset the phylo object
-subset_func <- function(phylo, level, choice, taxa, remove) {
-    # Taxa table
-    if(taxa) {
-        # Change the column name
-        positions <- colnames(phylo@tax_table@.Data)
-        colnames(phylo@tax_table@.Data)[which(positions == level)] <- "sel_col"
-        # Change the target name
-        phylo@tax_table@.Data[phylo@tax_table@.Data == choice] <- "choice"
-        
-        # Subset the object
-        if(!remove) phylo <- subset_taxa(phylo, sel_col== "choice")
-        else phylo <- subset_taxa(phylo, sel_col!= "choice")
-        
-        # Change the column back
-        positions <- colnames(phylo@tax_table@.Data)
-        colnames(phylo@tax_table@.Data)[which(positions=="sel_col")] <- level
-        # Change the target back
-        phylo@tax_table@.Data[phylo@tax_table@.Data == "choice"] <- choice
-    }
-    
-    # Sample table
-    else {
-        # Change the column name
-        positions <- colnames(phylo@sam_data)
-        colnames(phylo@sam_data)[which(positions==level)] <- "sel_col" 
-        # Change the target name
-        change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
-        change[change==choice] <- "choice"
-        phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
-        
-        if(!remove) phylo <- subset_samples(phylo, sel_col=="choice")
-        else phylo <- subset_samples(phylo, sel_col!="choice")
-        
-        # Change the target back
-        change <- as.character(phylo@sam_data@.Data[[which(positions==level)]])
-        change[change=="choice"] <- choice
-        phylo@sam_data@.Data[[which(positions==level)]] <- factor(change)
-        # Change the column back
-        positions <- colnames(phylo@sam_data)
-        colnames(phylo@sam_data)[which(positions=="sel_col")] <- level
-    }
-    
+# Functions to subset the phylo object
+taxa_subset <- function(phylo, level, choice, remove) {
+    if(!remove) x <- parse(text=paste0(level,"==","'",choice,"'"))
+    else x <- parse(text=paste0(level,"!=","'",choice,"'"))
+    oldTax <- data.frame(tax_table(phylo))
+    newTax <- subset(oldTax, eval(parse(text=x)))
+    tax_table(phylo) <- tax_table(as.matrix(newTax))
     return(phylo)
 }
+
+sample_subset <- function(phylo, level, choice, remove) {
+    if(!remove) x <- parse(text=paste0(level,"==","'",choice,"'"))
+    else x <- parse(text=paste0(level,"!=","'",choice,"'"))
+    oldSam <- data.frame(sample_data(phylo))
+    newSam <- subset(oldSam, eval(parse(text=x)))
+    sample_data(phylo) <- sample_data(data.frame(newSam))
+    return(phylo)
+}
+    
 
 subset_types <- c("subset_type1", "subset_type2", "subset_type3")
