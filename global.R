@@ -72,3 +72,5 @@ sample_subset <- function(phylo, level, choice, remove) {
     
 
 subset_types <- c("subset_type1", "subset_type2", "subset_type3")
+subset_levels <- c("subset_level1", "subset_level2", "subset_level3")
+subset_choices <- c("subset_choice1", "subset_choice2", "subset_choice3")

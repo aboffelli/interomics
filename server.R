@@ -17,7 +17,7 @@ server <- function(input, output, session) {
                                  row.names=1)[,1:9])
         }
         # Use example data
-        else GlobalPatterns@tax_table 
+        else tax_table(GlobalPatterns) 
     })
     
     otu_df <- reactive({
@@ -31,7 +31,7 @@ server <- function(input, output, session) {
                                  check.names=FALSE))
         }
         # Use example data
-        else GlobalPatterns@otu_table
+        else otu_table(GlobalPatterns)
     })
     
     sample_df <- reactive({
@@ -45,24 +45,24 @@ server <- function(input, output, session) {
             df
         }
         # Use example data
-        else GlobalPatterns@sam_data
+        else sample_data(GlobalPatterns)
     })
 
     output$taxa_table <- DT::renderDataTable({
         req(phylo())
-        phylo()@tax_table
+        tax_table(phylo())
         },
         rownames=TRUE)
             
     
     output$otu_table <- DT::renderDataTable({
         req(phylo())
-        phylo()@otu_table
+        otu_table(phylo())
     }, rownames=TRUE)
     
     output$sample_table <- DT::renderDataTable({
         req(phylo())
-        phylo()@sam_data
+        sample_data(phylo())
     }, rownames=TRUE)
     
     #Download tables
@@ -70,11 +70,11 @@ server <- function(input, output, session) {
         filename="interomics_tables.tar",
         content=function(filename) {
             
-            write.table(phylo()@tax_table, file="taxa_table.txt",
+            write.table(tax_table(phylo()), file="taxa_table.txt",
                         sep="\t", quote=FALSE, na="", col.names=NA)
-            write.table(phylo()@otu_table, file="otu_table.txt",
+            write.table(otu_table(phylo()), file="otu_table.txt",
                         sep="\t", quote=FALSE, na="", col.names=NA)
-            write.table(phylo()@sam_data, file="sample_table.txt",
+            write.table(sample_data(phylo()), file="sample_table.txt",
                         sep="\t", quote=FALSE, na="", col.names=NA)
             
             tar(filename, files=c("taxa_table.txt", 
@@ -85,123 +85,78 @@ server <- function(input, output, session) {
                           "sample_table.txt"))
         })
     
-    # Subset variables
-    observe({
-        req(taxa_df(), otu_df(), sample_df())
+    # Subset variables type
+    observeEvent(input$use_subset, {
+        req(input$use_subset)
         for(var in subset_types) {
             updateSelectInput(session, var,
                               choices=c("Taxa", "Sample"),
                               selected=FALSE)
         }
     })
-    # Subset variables level1
-    observeEvent(input$subset_type1, {
-        req(input$subset_type1)
-        # Taxa table
-        if(toString(input$subset_type1)=="Taxa") {
-            updateSelectInput(session, "subset_level1", 
-                              choices=colnames(taxa_df()),
-                              selected=FALSE)
-        }
-        # Sample table
-        else {
-            updateSelectInput(session, "subset_level1", 
-                              choices=colnames(sample_df()),
-                              selected=FALSE)
-        }
+    
+    # Subset variables level
+    observeEvent(c(input$subset_type1, 
+                   input$subset_type2, 
+                   input$subset_type3), {
+           req(phylo())
+            
+           for(i in 1:3) {
+               # Check if the the level box is empty before updating
+               # TODO: box do not update if not empty and you change type
+               x <- parse(text=paste0("input$",subset_levels[i]))
+               if(eval(x)=="") {
+                   x <- parse(text=paste0("input$",subset_types[i]))
+                   # Taxa table
+                   if(toString(eval(x))=="Taxa") {
+                       updateSelectInput(session, subset_levels[i], 
+                                      choices=colnames(tax_table(phylo())),
+                                      selected=FALSE)
+                       }
+                    # Sample table
+                    else if(toString(eval(x))=="Sample") {
+                        updateSelectInput(session, subset_levels[i], 
+                                          choices=colnames(
+                                              sample_data(phylo())),
+                                          selected=FALSE)
+                    }
+               }}
     })
     
-    # Subset variable choice1
-    observeEvent(input$subset_level1, {
-        req(input$subset_level1)
-        level <- toString(input$subset_level1)
-        # Taxa table
-        if(toString(input$subset_type1)=="Taxa")
-            updateSelectInput(session,
-                              "subset_choice1",
-                              choices=unique(taxa_df()[,level]),
-                              selected=FALSE)
-        # Sample table
-        else {
-            updateSelectInput(session,
-                              "subset_choice1",
-                              choices=unique(sample_df()[,level]),
-                              selected=FALSE)
-        }
+    # Subset variable choice
+    observeEvent(c(input$subset_level1,
+                   input$subset_level2,
+                   input$subset_level3,
+                   phylo()), {
+        req(phylo())
+                       
+        for(i in 1:3) {
+            # Check if the the choice box is empty before updating
+            # TODO: box do not update if not empty and you change level or type
+            x <- parse(text=paste0("input$",subset_choices[i]))
+            if(eval(x)=='') {
+                x <- parse(text=paste0("input$",subset_levels[i]))
+                level <- toString(eval(x))
+                # Taxa table
+                if(level %in% colnames(tax_table(phylo()))) {
+                    updateSelectInput(session,
+                                      subset_choices[i],
+                                      choices=unique(
+                                          tax_table(phylo())[,level]),
+                                      selected=FALSE)
+                }
+                # Sample table
+                else if (level %in% colnames(sample_data(phylo()))) {
+                    updateSelectInput(session,
+                                      subset_choices[i],
+                                      choices=unique(
+                                          sample_data(phylo())[,level]),
+                                      selected=FALSE)
+                }
+                }}
     })
     
-    # Subset variables level2
-    observeEvent(input$subset_type2, {
-        req(input$subset_type2)
-        # Taxa table
-        if(toString(input$subset_type2)=="Taxa") {
-            updateSelectInput(session, "subset_level2", 
-                              choices=colnames(taxa_df()),
-                              selected=FALSE)
-        }
-        # Sample table
-        else {
-            updateSelectInput(session, "subset_level2", 
-                              choices=colnames(sample_df()),
-                              selected=FALSE)
-        }
-    })
-    
-    # Subset variable choice2
-    observeEvent(input$subset_level2, {
-        req(input$subset_level2)
-        level <- toString(input$subset_level2)
-        # Taxa table
-        if(toString(input$subset_type2)=="Taxa")
-            updateSelectInput(session,
-                              "subset_choice2",
-                              choices=unique(taxa_df()[,level]),
-                              selected=FALSE)
-        # Sample table
-        else {
-            updateSelectInput(session,
-                              "subset_choice2",
-                              choices=unique(sample_df()[,level]),
-                              selected=FALSE)
-        }
-    })
-    
-    # Subset variables level3
-    observeEvent(input$subset_type3, {
-        req(input$subset_type3)
-        # Taxa table
-        if(toString(input$subset_type3)=="Taxa") {
-            updateSelectInput(session, "subset_level3", 
-                              choices=colnames(taxa_df()),
-                              selected=FALSE)
-        }
-        # Sample table
-        else {
-            updateSelectInput(session, "subset_level3", 
-                              choices=colnames(sample_df()),
-                              selected=FALSE)
-        }
-    })
-    
-    # Subset variable choice3
-    observeEvent(input$subset_level3, {
-        req(input$subset_level3)
-        level <- toString(input$subset_level3)
-        # Taxa table
-        if(toString(input$subset_type3)=="Taxa")
-            updateSelectInput(session,
-                              "subset_choice3",
-                              choices=unique(taxa_df()[,level]),
-                              selected=FALSE)
-        # Sample table
-        else {
-            updateSelectInput(session,
-                              "subset_choice3",
-                              choices=unique(sample_df()[,level]),
-                              selected=FALSE)
-        }
-    })
-    
+    # TODO: Merge subsets - merge_phyloseq()
     phylo <- reactive({
         req(taxa_df(), otu_df(), sample_df())
         
@@ -209,18 +164,17 @@ server <- function(input, output, session) {
                               otu=otu_df(),
                               sample=sample_df())
         
-        if(input$use_subset) {
-            # TODO: FIX - subset only works if there is no NA in the column
-            subset_data <- list(c(type=input$subset_type1, 
-                                  level=input$subset_level1,
+        if(input$use_subset==TRUE) {
+            subset_data <- list(c(type=isolate(input$subset_type1), 
+                                  level=isolate(input$subset_level1),
                                   choice=input$subset_choice1,
                                   remove=input$subset_remove1),
-                                c(type=input$subset_type2, 
-                                  level=input$subset_level2,
+                                c(type=isolate(input$subset_type2), 
+                                  level=isolate(input$subset_level2),
                                   choice=input$subset_choice2,
                                   remove=input$subset_remove2),
-                                c(type=input$subset_type3, 
-                                  level=input$subset_level3,
+                                c(type=isolate(input$subset_type3), 
+                                  level=isolate(input$subset_level3),
                                   choice=input$subset_choice3,
                                   remove=input$subset_remove3))
             
