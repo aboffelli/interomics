@@ -17,7 +17,22 @@ The program is written in R (4.0.3), and uses the following packages:
 
 ### Installing packages
 
-To install the necessary package open the R console and use the lines below.
+#### Conda
+
+Using Conda you can create a new environment with all necessary packages with the following code on the terminal.
+
+```bash
+# Creates a conda env and downloads all the necessary packages
+conda create -n interomics -c bioconda -c conda-forge r-base=4.0.3 r-dt bioconductor-phyloseq r-plotly r-ggplot2 r-metacoder r-shiny
+# Activate the environment
+conda activate interomics
+# Start the R console in the terminal
+R
+```
+
+#### R console/Rstudio
+
+To install the necessary package open the R console/Rstudio and use the lines below.
 
 ```R
 # Run each line separately.
@@ -25,6 +40,8 @@ packages <- c("shiny", "metacoder", "ggplot2", "plotly", "BiocManager", "DT")
 for(package in packages) install.packages(package)
 BiocManager::install("phyloseq", ask=FALSE)
 ```
+
+
 
 ### Running the program
 
