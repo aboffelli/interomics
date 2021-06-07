@@ -14,6 +14,7 @@ The program is written in R (4.0.3), and uses the following packages:
 - plotly 4.9.3
 - ggplot2 3.3.3
 - BiocManager 1.30.12
+- DT 0.18
 
 ### Installing packages
 
