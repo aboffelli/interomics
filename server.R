@@ -153,8 +153,8 @@ server <- function(input, output, session) {
                 else if (level %in% colnames(sample_data(phylo()))) {
                     updateSelectInput(session,
                                       subset_choices[i],
-                                      choices=unique(
-                                          sample_data(phylo())[,level]),
+                                      choices=unique(as.matrix(
+                                          sample_data(phylo())[,level])),
                                       selected=character(0))
                 }
                 }}
