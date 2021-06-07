@@ -51,19 +51,18 @@ server <- function(input, output, session) {
     output$taxa_table <- DT::renderDataTable({
         req(phylo())
         tax_table(phylo())
-        },
-        rownames=TRUE)
+        }, rownames=TRUE)
             
     
     output$otu_table <- DT::renderDataTable({
         req(phylo())
         otu_table(phylo())
-    }, rownames=TRUE)
+        }, rownames=TRUE)
     
     output$sample_table <- DT::renderDataTable({
         req(phylo())
         sample_data(phylo())
-    }, rownames=TRUE)
+        }, rownames=TRUE)
     
     #Download tables
     output$download_subset <- downloadHandler(
@@ -88,10 +87,16 @@ server <- function(input, output, session) {
     # Subset variables type
     observeEvent(input$use_subset, {
         req(input$use_subset)
+        # Clear all boxes
+        for (var in c(subset_types, subset_levels, subset_choices)) {
+            updateSelectizeInput(session, var,
+                              choices=character(0),
+                              selected=character(0))
+        }
         for(var in subset_types) {
-            updateSelectInput(session, var,
+            updateSelectizeInput(session, var,
                               choices=c("Taxa", "Sample"),
-                              selected=FALSE)
+                              selected=character(0))
         }
     })
     
@@ -111,14 +116,14 @@ server <- function(input, output, session) {
                    if(toString(eval(x))=="Taxa") {
                        updateSelectInput(session, subset_levels[i], 
                                       choices=colnames(tax_table(phylo())),
-                                      selected=FALSE)
+                                      selected=character(0))
                        }
                     # Sample table
                     else if(toString(eval(x))=="Sample") {
                         updateSelectInput(session, subset_levels[i], 
                                           choices=colnames(
                                               sample_data(phylo())),
-                                          selected=FALSE)
+                                          selected=character(0))
                     }
                }}
     })
@@ -132,9 +137,8 @@ server <- function(input, output, session) {
                        
         for(i in 1:3) {
             # Check if the the choice box is empty before updating
-            # TODO: box do not update if not empty and you change level or type
             x <- parse(text=paste0("input$",subset_choices[i]))
-            if(eval(x)=='') {
+            if(toString(eval(x))=='') {
                 x <- parse(text=paste0("input$",subset_levels[i]))
                 level <- toString(eval(x))
                 # Taxa table
@@ -143,7 +147,7 @@ server <- function(input, output, session) {
                                       subset_choices[i],
                                       choices=unique(
                                           tax_table(phylo())[,level]),
-                                      selected=FALSE)
+                                      selected=character(0))
                 }
                 # Sample table
                 else if (level %in% colnames(sample_data(phylo()))) {
@@ -151,7 +155,7 @@ server <- function(input, output, session) {
                                       subset_choices[i],
                                       choices=unique(
                                           sample_data(phylo())[,level]),
-                                      selected=FALSE)
+                                      selected=character(0))
                 }
                 }}
     })
@@ -167,15 +171,15 @@ server <- function(input, output, session) {
         if(input$use_subset==TRUE) {
             subset_data <- list(c(type=isolate(input$subset_type1), 
                                   level=isolate(input$subset_level1),
-                                  choice=input$subset_choice1,
+                                  choice=toString(input$subset_choice1),
                                   remove=input$subset_remove1),
                                 c(type=isolate(input$subset_type2), 
                                   level=isolate(input$subset_level2),
-                                  choice=input$subset_choice2,
+                                  choice=toString(input$subset_choice2),
                                   remove=input$subset_remove2),
                                 c(type=isolate(input$subset_type3), 
                                   level=isolate(input$subset_level3),
-                                  choice=input$subset_choice3,
+                                  choice=toString(input$subset_choice3),
                                   remove=input$subset_remove3))
             
             for(i in 1:3){
@@ -204,16 +208,24 @@ server <- function(input, output, session) {
     
     # Update variable boxes when change tab
     observeEvent(input$tabswitch, {
-        req(taxa_df(), otu_df(), sample_df())
+        req(phylo())
+        # Clear all boxes
+        for (var in c("sample_var", "taxa_filter_level", 
+                      "fill_var", "shape_var", "alpha_x_var",
+                      "alpha_col_var", "alpha_shape_var")) {
+            updateVarSelectizeInput(session, var,
+                                    data=character(0))
+        }
+        updateSelectizeInput(session, "alpha_measure_var", selected=character(0))
         
         # Heatmap
         updateVarSelectInput(session, 
                              "sample_var", 
-                             data=sample_df(), selected=FALSE)
+                             data=sample_df(), selected=character(0))
         #Tax tree
         updateSelectInput(session, 
                           "taxa_filter_level", 
-                          choices=colnames(taxa_df()), selected=FALSE)
+                          choices=colnames(taxa_df()), selected=character(0))
         
         # Biplot
         # Create a df with all sample and taxa columns
@@ -222,14 +234,14 @@ server <- function(input, output, session) {
         for (var in c("fill_var", "shape_var")) {
             updateVarSelectInput(session,
                                  var, 
-                                 data = x, selected=FALSE)
+                                 data = x, selected=character(0))
         }
         
         # Alpha diversity
         for (var in c("alpha_x_var", "alpha_col_var", "alpha_shape_var")) {
         updateVarSelectInput(session,
                              var,
-                             data=sample_df(), selected=FALSE)
+                             data=sample_df(), selected=character(0))
         }
         
     })
@@ -279,7 +291,7 @@ server <- function(input, output, session) {
         updateSelectInput(session,
                           "taxa_filter_selection",
                           choices=unique(taxa_df()[,level]),
-                          selected=FALSE)
+                          selected=character(0))
     })
     # Create the tree object
     # eventReactive isolate the selection boxes, so the tree will be created only after clicking the button.
@@ -371,6 +383,7 @@ server <- function(input, output, session) {
         
         phylo <- phylo()
         
+        # TODO: slider to select the number to prune.
         Alpha <- prune_taxa(taxa_sums(phylo) > 10, phylo) 
         
         x <- toString(input$alpha_x_var)
@@ -385,7 +398,6 @@ server <- function(input, output, session) {
         if(!is.null(input$alpha_shape_var)) {
             shape <- toString(input$alpha_shape_var)
         }
-        
         alpha_div <- plot_richness(Alpha,
                                    x=x,
                                    color=col,
