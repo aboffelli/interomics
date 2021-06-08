@@ -266,9 +266,16 @@ ui <- fluidPage(
                                          choices=c("Observed", "Chao1", "ACE",
                                                    "Shannon", "Simpson",
                                                    "InvSimpson", "Fisher"),
-                                         multiple=TRUE))
+                                         multiple=TRUE)),
+                   column(4,
+                          sliderInput("alpha_slider",
+                                      "Trim the data",
+                                      min=0,
+                                      max=30,
+                                      value=0,
+                                      width='100%'))
                  ),
-                   helpText("The X variable and the measure are required. More then one measure can be selected at the same time."),
+                   helpText("The X variable and the measure are required. More then one measure can be selected at the same time. OTUs with the abundance equal to or below the number chosen in the slider will be removed."),
                  downloadButton("download_alpha"),
                  
                  # Plot display

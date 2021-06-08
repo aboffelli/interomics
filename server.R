@@ -383,8 +383,8 @@ server <- function(input, output, session) {
         
         phylo <- phylo()
         
-        # TODO: slider to select the number to prune.
-        Alpha <- prune_taxa(taxa_sums(phylo) > 10, phylo) 
+        trim_value <- input$alpha_slider 
+        Alpha <- prune_taxa(taxa_sums(phylo) > trim_value, phylo) 
         
         x <- toString(input$alpha_x_var)
         
