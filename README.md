@@ -74,17 +74,17 @@ It is possible to load an example dataset selecting the checkbox "Load an exampl
 
 The subset will affect all the plots, with the exception of the Taxonomic Tree, that has its own filtering options.
 
-First, select if the target group will be isolated or removed from the data, using the radio buttons above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
+To subset the data, select the checkbox "Use subsetted data". The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes. This checkbox can also be used to reset all the subset boxes, just by unchecking and checking again.
 
-You can have up to three subsets simultaneously. You can use any box set, however, keep in mind that the subset will follow the order in the screen. So, be careful of isolating a group that was removed in a previous box set.
+First, select if the target group will be isolated or removed from the data, using the radio buttons – Select/Remove – above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
 
-To use the subsetted data, select the checkbox "Use subsetted data". The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes.
+The "Select" option allow multiple targets. However, the "Remove" option will only remove one target, if multiple are selected, only the first one will be removed for the dataset.
 
 You can download the subsetted tables, as tab delimited text files. The button "Download subsetted data" will download a tar file containing the three files.
 
 
 
-The tables will be displayed in the right side, and changed if the subset option is activated. The tables are interactive, which means that you can: choose the number of entries to show, sort the rows based on the values of the column in ascending or descending order, search for an specific value.
+The tables will be displayed in the right side, and updated according to the subset options, if activated. The tables are interactive, which means that you can: choose the number of entries to show, sort the rows based on the values of the column in ascending or descending order, search for an specific value.
 
 
 
@@ -113,5 +113,7 @@ The biplot is interactive, which means that you can zoom in selecting an area in
 ### Alpha-Diversity
 
 Only the "X" variable and the "Measures" are required for the Alpha-Diversity plot. The "Color" and "Shape" variables are optional, if not selected, all samples will be colored black and shaped as circles. You can select multiple types of measure, each of them will be displayed side by side.
+
+The slider can be used to trim the data for the alpha-diversity calculation. OTUs with the abundance equal to or lower than the number selected will be removed for the calculation.
 
 The alpha-diversity plot is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the selected variables and value of the measure selected. You can hide a group by clicking on the legend corresponding to that group in the right side, or isolate a group by double clicking in the legend corresponding to the group. In the top right corner of the plot you will find some command buttons, including: save the plot as a png image, selection box, zoom in and out, reset axes, etc. Click the button "Download" to download the original plot as pdf – any interactive change, such as zoom or hidden objects, will not be present.
