@@ -117,13 +117,13 @@ server <- function(input, output, session) {
                    x <- parse(text=paste0("input$",subset_types[i]))
                    # Taxa table
                    if(toString(eval(x))=="Taxa") {
-                       updateSelectInput(session, subset_levels[i], 
+                       updateSelectizeInput(session, subset_levels[i], 
                                       choices=colnames(tax_table(phylo())),
                                       selected=character(0))
                        }
                     # Sample table
                     else if(toString(eval(x))=="Sample") {
-                        updateSelectInput(session, subset_levels[i], 
+                        updateSelectizeInput(session, subset_levels[i], 
                                           choices=colnames(
                                               sample_data(phylo())),
                                           selected=character(0))
@@ -146,7 +146,7 @@ server <- function(input, output, session) {
                 level <- toString(eval(x))
                 # Taxa table
                 if(level %in% colnames(tax_table(phylo()))) {
-                    updateSelectInput(session,
+                    updateSelectizeInput(session,
                                       subset_choices[i],
                                       choices=unique(
                                           tax_table(phylo())[,level]),
@@ -154,7 +154,7 @@ server <- function(input, output, session) {
                 }
                 # Sample table
                 else if (level %in% colnames(sample_data(phylo()))) {
-                    updateSelectInput(session,
+                    updateSelectizeInput(session,
                                       subset_choices[i],
                                       choices=unique(as.matrix(
                                           sample_data(phylo())[,level])),
@@ -209,19 +209,30 @@ server <- function(input, output, session) {
                         }
                         # if choice > 1 create more phylo objects and merge them
                         else {
-                            phylos <- list()
-                            for(i in 1:length(x)) {
-                                merge_phylo <- taxa_subset(
-                                    phylo,
-                                    level=subset_data["level"],
-                                    choice=subset_data[paste0("choice",i)],
-                                    remove=remove)
-                                phylos[[i]] <- merge_phylo
-                                }
-                            
-                            phylo <- phylos[[1]]
-                            for (i in 2:length(phylos))
-                                phylo <- merge_phyloseq(phylo, phylos[[i]])
+                            # Select option
+                            if(!remove) {
+                                phylos <- list()
+                                for(i in 1:length(x)) {
+                                    merge_phylo <- taxa_subset(
+                                        phylo,
+                                        level=subset_data["level"],
+                                        choice=subset_data[paste0("choice",i)],
+                                        remove=remove)
+                                    phylos[[i]] <- merge_phylo
+                                    }
+                                
+                                phylo <- phylos[[1]]
+                                for (i in 2:length(phylos))
+                                    phylo <- merge_phyloseq(phylo, phylos[[i]])
+                            }
+                            else{
+                                for(i in 1:length(x)){
+                                    phylo <- taxa_subset(
+                                        phylo,
+                                        level=subset_data["level"],
+                                        choice=subset_data[paste0("choice",i)],
+                                        remove=remove)
+                                }}
                             }}
                     # Sample subset    
                     else {
@@ -235,19 +246,29 @@ server <- function(input, output, session) {
                         }
                         # if choice > 1 create more phylo objects and merge them
                         else {
-                            phylos <- list()
-                            for(i in 1:length(x)) {
-                                merge_phylo <- sample_subset(
-                                    phylo,
-                                    level=subset_data["level"],
-                                    choice=subset_data[paste0("choice",i)],
-                                    remove=remove)
-                                phylos[[i]] <- merge_phylo
+                            if(!remove) {
+                                phylos <- list()
+                                for(i in 1:length(x)) {
+                                    merge_phylo <- sample_subset(
+                                        phylo,
+                                        level=subset_data["level"],
+                                        choice=subset_data[paste0("choice",i)],
+                                        remove=remove)
+                                    phylos[[i]] <- merge_phylo
+                                }
+                                phylo <- phylos[[1]]
+                                for (i in 2:length(phylos))
+                                    phylo <- merge_phyloseq(phylo, phylos[[i]])
                             }
-                            phylo <- phylos[[1]]
-                            for (i in 2:length(phylos))
-                                phylo <- merge_phyloseq(phylo, phylos[[i]])
-                    }
+                            else{
+                                for(i in 1:length(x)){
+                                    phylo <- sample_subset(
+                                        phylo,
+                                        level=subset_data["level"],
+                                        choice=subset_data[paste0("choice",i)],
+                                        remove=remove) 
+                                }
+                            }}
 
                 }}}}
         phylo
@@ -258,21 +279,23 @@ server <- function(input, output, session) {
     observeEvent(input$tabswitch, {
         req(phylo())
         # Clear all boxes
-        for (var in c("sample_var", "taxa_filter_level", 
-                      "fill_var", "shape_var", "alpha_x_var",
+        for (var in c("sample_var", "taxa_filter_level",
+                      "taxa_filter_selection", "fill_var", 
+                      "shape_var", "alpha_x_var",
                       "alpha_col_var", "alpha_shape_var")) {
             updateVarSelectizeInput(session, var,
-                                    data=character(0))
+                                    data=character(0),
+                                    selected=character(0))
         }
         updateSelectizeInput(session, "alpha_measure_var", 
                              selected=character(0))
         
         # Heatmap
-        updateVarSelectInput(session, 
+        updateVarSelectizeInput(session, 
                              "sample_var", 
                              data=sample_df(), selected=character(0))
         #Tax tree
-        updateSelectInput(session, 
+        updateSelectizeInput(session, 
                           "taxa_filter_level", 
                           choices=colnames(taxa_df()), selected=character(0))
         
@@ -281,14 +304,14 @@ server <- function(input, output, session) {
         x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
         colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
         for (var in c("fill_var", "shape_var")) {
-            updateVarSelectInput(session,
+            updateVarSelectizeInput(session,
                                  var, 
                                  data = x, selected=character(0))
         }
         
         # Alpha diversity
         for (var in c("alpha_x_var", "alpha_col_var", "alpha_shape_var")) {
-        updateVarSelectInput(session,
+        updateVarSelectizeInput(session,
                              var,
                              data=sample_df(), selected=character(0))
         }
@@ -335,12 +358,13 @@ server <- function(input, output, session) {
     observeEvent(input$taxa_filter_level, {
         req(input$taxa_filter_level)
         level <- toString(input$taxa_filter_level)
-        
+        if(level!=""){
         # Update the filter target
-        updateSelectInput(session,
-                          "taxa_filter_selection",
-                          choices=unique(taxa_df()[,level]),
-                          selected=character(0))
+            updateSelectizeInput(session,
+                              "taxa_filter_selection",
+                              choices=unique(taxa_df()[,level]),
+                              selected=character(0))
+            }
     })
     # Create the tree object
     # eventReactive isolate the selection boxes, so the tree will be created only after clicking the button.
