@@ -144,7 +144,7 @@ ui <- fluidPage(
           column(
             12,
             p(strong("OTU table")),
-            div(style = "height:350px; overflow-y:scroll",
+            div(style = "height:500px; overflow-y:scroll",
                 # Display the tables
                 DT::dataTableOutput("otu_table"))
           ),
@@ -152,14 +152,14 @@ ui <- fluidPage(
             12,
             hr(),
             p(strong("Taxa table")),
-            div(style = "height:350px; overflow-y:scroll",
+            div(style = "height:500px; overflow-y:scroll",
                 DT::dataTableOutput("taxa_table"))
           ),
           column(
             12,
             hr(),
             p(strong("Sample table")),
-            div(style = "height:350px; overflow-y:scroll",
+            div(style = "height:500px; overflow-y:scroll",
                 DT::dataTableOutput("sample_table"))
             ))
           ))
@@ -212,7 +212,8 @@ ui <- fluidPage(
                    ),
                  actionButton("make_tree", "Create tree"),
                  downloadButton("download_tree"),
-                 helpText("You can choose any level to filter, however the filtering is optional. To create the tree, click in the button above. The image may take some time to be created."),
+                 helpText("You can choose any level to filter, however the filtering is optional. 
+                          To create the tree, click in the button above. The image may take some time to be created."),
                  wellPanel(
                    plotOutput("tax_tree",
                               height="1500px")
@@ -275,7 +276,8 @@ ui <- fluidPage(
                                       value=0,
                                       width='100%'))
                  ),
-                   helpText("The X variable and the measure are required. More then one measure can be selected at the same time. OTUs with the abundance equal to or below the number chosen in the slider will be removed."),
+                   helpText("The X variable and the measure are required. More then one measure can be selected at the same time.
+                            OTUs with the abundance equal to or below the number chosen in the slider will be removed."),
                  downloadButton("download_alpha"),
                  
                  # Plot display

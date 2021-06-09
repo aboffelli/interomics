@@ -4,7 +4,7 @@ server <- function(input, output, session) {
         data("GlobalPatterns")
     })
     
-    # Upload tab
+    # Upload tables
     # TODO: the taxa table must have only the taxa information, so there will be no indexing of the table.
     taxa_df <- reactive({
         if(!input$example) {
@@ -47,7 +47,7 @@ server <- function(input, output, session) {
         # Use example data
         else sample_data(GlobalPatterns)
     })
-
+    # Display tables
     output$taxa_table <- DT::renderDataTable({
         req(phylo())
         tax_table(phylo())
@@ -83,6 +83,9 @@ server <- function(input, output, session) {
                           "otu_table.txt", 
                           "sample_table.txt"))
         })
+
+################################################################################
+    # Subset
     
     # Subset variables type
     observeEvent(input$use_subset, {
@@ -160,52 +163,97 @@ server <- function(input, output, session) {
                 }}
     })
     
-    # TODO: Merge subsets - merge_phyloseq()
+################################################################################
+    # Create the phylo object
     phylo <- reactive({
         req(taxa_df(), otu_df(), sample_df())
         
+        # Create phylo object without subset
         phylo <- create_phylo(taxa=taxa_df(),
                               otu=otu_df(),
                               sample=sample_df())
         
+        # Check subset
         if(input$use_subset==TRUE) {
-            subset_data <- list(c(type=isolate(input$subset_type1), 
-                                  level=isolate(input$subset_level1),
-                                  choice=toString(input$subset_choice1),
-                                  remove=input$subset_remove1),
-                                c(type=isolate(input$subset_type2), 
-                                  level=isolate(input$subset_level2),
-                                  choice=toString(input$subset_choice2),
-                                  remove=input$subset_remove2),
-                                c(type=isolate(input$subset_type3), 
-                                  level=isolate(input$subset_level3),
-                                  choice=toString(input$subset_choice3),
-                                  remove=input$subset_remove3))
-            
+
             for(i in 1:3){
-                if(subset_data[[i]]["choice"]!=""){
-                    if (subset_data[[i]]["remove"] == "Select") remove <- FALSE
+                x <- eval(parse(text=paste0("input$",subset_choices[i])))
+                # If choice box is not empty
+                if(toString(x)!=""){
+                    subset_data <- c(
+                        type=isolate(eval(
+                            parse(text=paste0("input$",
+                                              subset_types[i])))), 
+                        level=isolate(eval(
+                                parse(text=paste0("input$",
+                                                  subset_levels[i])))),
+                        choice=isolate(eval(
+                            parse(text=paste0("input$",
+                                              subset_choices[i])))),
+                        remove=eval(
+                            parse(text=paste0("input$", 
+                                              subset_removes[i]))))
+                    
+                    if (subset_data["remove"] == "Select") remove <- FALSE
                     else remove <- TRUE
                     
-                    if (subset_data[[i]]["type"] == "Taxa") {
-                        phylo <- taxa_subset(
-                            phylo,
-                            level=subset_data[[i]]["level"],
-                            choice=subset_data[[i]]["choice"],
-                            remove=remove)
+                    # Check if it is a Taxa or Sample subset
+                    if (subset_data["type"] == "Taxa") {
+                        # Check if there are more than 1 selection
+                        if (length(x) == 1) {
+                            phylo <- taxa_subset(
+                                phylo,
+                                level=subset_data["level"],
+                                choice=subset_data["choice"],
+                                remove=remove)
+                        }
+                        # if choice > 1 create more phylo objects and merge them
+                        else {
+                            phylos <- list()
+                            for(i in 1:length(x)) {
+                                merge_phylo <- taxa_subset(
+                                    phylo,
+                                    level=subset_data["level"],
+                                    choice=subset_data[paste0("choice",i)],
+                                    remove=remove)
+                                phylos[[i]] <- merge_phylo
+                                }
+                            
+                            phylo <- phylos[[1]]
+                            for (i in 2:length(phylos))
+                                phylo <- merge_phyloseq(phylo, phylos[[i]])
+                            }}
+                    # Sample subset    
+                    else {
+                        # Check if there are more than 1 selection
+                        if (length(x) == 1) {
+                            phylo <- sample_subset(
+                                phylo,
+                                level=subset_data["level"],
+                                choice=subset_data["choice"],
+                                remove=remove)
+                        }
+                        # if choice > 1 create more phylo objects and merge them
+                        else {
+                            phylos <- list()
+                            for(i in 1:length(x)) {
+                                merge_phylo <- sample_subset(
+                                    phylo,
+                                    level=subset_data["level"],
+                                    choice=subset_data[paste0("choice",i)],
+                                    remove=remove)
+                                phylos[[i]] <- merge_phylo
+                            }
+                            phylo <- phylos[[1]]
+                            for (i in 2:length(phylos))
+                                phylo <- merge_phyloseq(phylo, phylos[[i]])
                     }
-                    else 
-                        phylo <- sample_subset(
-                            phylo=phylo, 
-                            level=subset_data[[i]]["level"],
-                            choice=subset_data[[i]]["choice"],
-                            remove=remove)
-                    
-                }}}
+
+                }}}}
         phylo
     })
     
-    
+################################################################################
     # Update variable boxes when change tab
     observeEvent(input$tabswitch, {
         req(phylo())
@@ -216,7 +264,8 @@ server <- function(input, output, session) {
             updateVarSelectizeInput(session, var,
                                     data=character(0))
         }
-        updateSelectizeInput(session, "alpha_measure_var", selected=character(0))
+        updateSelectizeInput(session, "alpha_measure_var", 
+                             selected=character(0))
         
         # Heatmap
         updateVarSelectInput(session, 
@@ -246,7 +295,7 @@ server <- function(input, output, session) {
         
     })
     
-###############################################################################
+################################################################################
     # Abundance tab
     
     # Heatmap object
@@ -337,7 +386,7 @@ server <- function(input, output, session) {
         })
     
     
-###############################################################################
+################################################################################
     # Graphics tab
     
     # Biplot object
