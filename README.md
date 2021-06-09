@@ -78,7 +78,7 @@ To subset the data, select the checkbox "Use subsetted data". The program will n
 
 First, select if the target group will be isolated or removed from the data, using the radio buttons – Select/Remove – above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
 
-The "Select" option allow multiple targets. However, the "Remove" option will only remove one target, if multiple are selected, only the first one will be removed for the dataset.
+Both options – select and remove – allow multiple target selection.
 
 You can download the subsetted tables, as tab delimited text files. The button "Download subsetted data" will download a tar file containing the three files.
 
