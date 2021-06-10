@@ -48,15 +48,25 @@ BiocManager::install("phyloseq", ask=FALSE)
 
 The program consists in three files – *ui.R*, *server.R*, and *global.R* – that must be stored together in the same directory.
 
-After the installation of the necessary packages and making sure that the three files (*ui.R*, *server.R*, and *global.R*) are together, you can run the program with the following line in the R console.
+After the installation of the necessary packages and making sure that the three files – *ui.R*, *server.R*, and *global.R* – are together, you can run the program with the following line in the R console.
 
 ```R
 # The path below is an example, you may need to change it according to where the files are saved. 
 # It must point to the whole directory containing the three files mentioned before. 
 shiny::runApp("C:/User/Example/Interomics")
+
+# Optionally, you can select the port that will be used for the server (4 number digit).
+shiny::runApp("C:/User/Example/Interomics", port=xxxx)
 ```
 
+The error **Error in utils::browseURL(appUrl) : 'browser' must be a non-empty character string** may happen in your console. This means that R cannot open the browser automatically. To solve this error change the code above to the one below.
 
+```R
+# Can also be used with the port selection
+shiny::runApp("C:/User/Example/Interomics", launch.browser=FALSE)
+```
+
+This will prevent R from opening the browser automatically, just copy the URL that appears on the console and use it in your browser of preference.
 
 ## File Upload
 
