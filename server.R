@@ -5,7 +5,6 @@ server <- function(input, output, session) {
     })
     
     # Upload tables
-    # TODO: the taxa table must have only the taxa information, so there will be no indexing of the table.
     taxa_df <- reactive({
         if(!input$example) {
             req(input$taxa)
@@ -14,7 +13,7 @@ server <- function(input, output, session) {
                                  header = TRUE,
                                  sep = input$sep, 
                                  na.strings="",
-                                 row.names=1)[,1:9])
+                                 row.names=1))
         }
         # Use example data
         else tax_table(GlobalPatterns) 
