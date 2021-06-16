@@ -2,7 +2,6 @@ library(shiny)
 library(plotly)
 library(metacoder)
 library(phyloseq)
-library(ggplot2)
 library(DT)
 
 # Set a new theme for ggplot
