@@ -19,7 +19,7 @@ The program is written in R (4.0.3), and uses the following packages:
 
 #### Conda (recommended)
 
-Using Conda you can create a new environment with all necessary packages with the following code on the terminal.
+Using Conda (4.9.2) you can create a new environment with all necessary packages with the following code on the terminal.
 
 ```bash
 # Creates a conda env and downloads all the necessary packages
@@ -75,7 +75,7 @@ The files can be uploaded in the initial page *File Upload*, where three files a
 - Taxonomic table for each OTU. The first column must contain the OTU name/number. The first row must contain the taxonomic levels.
 - Sample data. The first column must contain the sample names. The first row will be read as a header.
 
-The accepted formats are: plain-text (txt), comma-separated-values (csv), tab-delimited (tab/tsv). The type of separator can be defined in the *File Upload* page, the options are tab, comma, and semicolon.
+The accepted formats are: plain-text (txt), comma-separated-values (csv), tab-delimited (tab/tsv). The type of separator can be defined in the *File Upload* page, the options are tab, comma, and semicolon. Make sure that all sample/OTU names are exactly the same in the three files, any difference in the names will end up in the removal of that sample/OTU.
 
 It is possible to load an example dataset selecting the checkbox *Load an example dataset* under the slider. When selected, the three example tables will be loaded and displayed.
 
