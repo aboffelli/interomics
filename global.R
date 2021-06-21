@@ -17,12 +17,12 @@ create_phylo <- function(taxa, otu, sample) {
 }
 
 # Function to create a phylo object using phyloseq
-create_biplot <- function(phylo_object, fill, shape) {
+create_beta <- function(phylo_object, type, fill, shape) {
     phylo.ord <- ordinate(phylo_object, "NMDS", "bray")
-    biplot <- plot_ordination(phylo_object, phylo.ord, 
-                              type="split", color=fill, 
+    Beta <- plot_ordination(phylo_object, phylo.ord, 
+                              type=type, color=fill, 
                               shape=shape)
-    return(biplot)
+    return(Beta)
 }
 
 # Function to generate the taxonomic tree.

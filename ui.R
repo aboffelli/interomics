@@ -222,45 +222,27 @@ ui <- fluidPage(
     
 ###############################################################################
     # Function tab containing Biplot and Alpha Diversity plots
-    tabPanel("Function",
+    tabPanel("Diversity",
       value = "graph",
       # Division between Biplot and Alpha
       navlistPanel(
         widths = c(2, 10),
         
-        tabPanel("Biplot",
-                 # Variable selection boxes
-                 fluidRow(
-                   column(2,
-                          varSelectizeInput("fill_var", 
-                                         "Select the color variable", 
-                                         data=FALSE)),
-                   column(2,
-                          varSelectizeInput('shape_var', 
-                                         "Select the shape variable", 
-                                         data=FALSE))
-                 ),
-                 helpText("Both, color and shape variables, are required to load the plot."),
-                 downloadButton("download_biplot"),
-                 # Plot display
-                 wellPanel(plotlyOutput("biplot",
-                                        height = "750px"))),
-        
-        tabPanel("Alpha Diversity",
+        tabPanel("Alpha-Diversity",
                  # Variables selection
                  fluidRow(
                    column(2,
                           varSelectizeInput("alpha_x_var", 
-                                         "Select the x variable", 
-                                         data=FALSE)),
+                                            "Select the x variable", 
+                                            data=character(0))),
                    column(2,
                           varSelectizeInput("alpha_col_var",
-                                         "Select the color variable",
-                                         data=FALSE)),
+                                            "Select the color variable",
+                                            data=character(0))),
                    column(2,
                           varSelectizeInput("alpha_shape_var",
-                                         "Select the shape variable",
-                                         data=FALSE)),
+                                            "Select the shape variable",
+                                            data=character(0))),
                    column(2,
                           selectizeInput("alpha_measure_var", 
                                          "Select the measures used",
@@ -276,12 +258,34 @@ ui <- fluidPage(
                                       value=0,
                                       width='100%'))
                  ),
-                   helpText("The X variable and the measure are required. More then one measure can be selected at the same time.
+                 helpText("The X variable and the measure are required. More then one measure can be selected at the same time.
                             OTUs with the abundance equal to or below the number chosen in the slider will be removed."),
                  downloadButton("download_alpha"),
                  
                  # Plot display
                  wellPanel(plotlyOutput("alpha",
+                                        height = "750px"))),
+        
+        tabPanel("Beta-Diversity",
+                 # Variable selection boxes
+                 fluidRow(
+                   column(2,
+                          selectizeInput("type_var", 
+                                         "Select the type", 
+                                         choices=character(0))),
+                   column(2,
+                          varSelectizeInput("fill_var", 
+                                         "Select the color variable", 
+                                         data=character(0))),
+                   column(2,
+                          varSelectizeInput('shape_var', 
+                                         "Select the shape variable", 
+                                         data=character(0)))
+                 ),
+                 helpText("All variables, type, color and shape, are required to load the plot."),
+                 downloadButton("download_beta"),
+                 # Plot display
+                 wellPanel(plotlyOutput("beta",
                                         height = "750px")))
       )
     )

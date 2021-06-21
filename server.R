@@ -298,15 +298,12 @@ server <- function(input, output, session) {
                           "taxa_filter_level", 
                           choices=colnames(taxa_df()), selected=character(0))
         
-        # Biplot
-        # Create a df with all sample and taxa columns
-        x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
-        colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
-        for (var in c("fill_var", "shape_var")) {
-            updateVarSelectizeInput(session,
-                                 var, 
-                                 data = x, selected=character(0))
-        }
+        # Beta diversity
+        updateSelectizeInput(session, "type_var", 
+                             choices=c("taxa", "samples",
+                                       "biplot", "split"),
+                             selected=character(0))
+                             
         
         # Alpha diversity
         for (var in c("alpha_x_var", "alpha_col_var", "alpha_shape_var")) {
@@ -339,8 +336,8 @@ server <- function(input, output, session) {
         
         # Display plot
         ggplotly(heat_plot()
-                 + theme(plot.margin = unit(c(1, 1, 1, 1), "cm"))
-                 )   
+                 + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")), tooltip=c(
+                     "Sample", "OTU", "Abundance"))
     })
     
     # Heatmap download
@@ -410,43 +407,7 @@ server <- function(input, output, session) {
     
     
 ################################################################################
-    # Graphics tab
-    
-    # Biplot object
-    biplot <- reactive({
-        # only works after selecting fill and shape
-        req(input$fill_var, input$shape_var)
-        chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
-        
-        phylo <- phylo()
-        
-        
-        biplot <- create_biplot(phylo, 
-                                fill=chosen_var[1], 
-                                shape=chosen_var[2]) +
-            scale_shape(solid=FALSE)
-    })
-    # Display biplot
-    output$biplot <- renderPlotly({
-        req(biplot())
-        chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
-        ggplotly(biplot()
-                 + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")),
-                 tooltip=c(chosen_var[1],
-                           chosen_var[2], 
-                           "NMDS1", 
-                           "NMDS2"))
-    })
-    
-    # Biplot download
-    output$download_biplot <- downloadHandler(
-        filename="biplot.pdf",
-        content=function(file){
-            pdf(file, width=12, height=10)
-            print(biplot())
-            dev.off()
-        })
-    
+    # Diversity tab
     
     # Alpha-diversity object
     alpha_div <- reactive({
@@ -506,6 +467,72 @@ server <- function(input, output, session) {
         content=function(file){
             pdf(file, width=12, height=10)
             print(alpha_div())
+            dev.off()
+        })
+    
+    # Beta selection boxes update
+    observeEvent(input$type_var, {
+        req(input$type_var)
+        type <- input$type_var
+        if(type %in% c("biplot", "split")) {
+            x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
+            colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
+            for (var in c("fill_var", "shape_var")) {
+                updateVarSelectizeInput(session,
+                                        var, 
+                                        data = x, selected=character(0))
+            }}
+        else if(type == "taxa") {
+            for(var in c("fill_var", "shape_var")) {
+                print(var)
+                updateVarSelectizeInput(session,
+                                        var, 
+                                        data = taxa_df(), 
+                                        selected=character(0))  
+            }}
+        else {
+            for (var in c("fill_var", "shape_var")) {
+                updateVarSelectizeInput(session,
+                                        var, 
+                                        data = sample_df(), 
+                                        selected=character(0))
+        }}
+            
+    })
+    
+    # Beta-diversity object
+    beta_div <- reactive({
+        # only works after selecting fill and shape
+        req(input$fill_var, input$shape_var)
+        chosen_var <- c(toString(input$type_var), toString(input$fill_var), toString(input$shape_var))
+        
+        phylo <- phylo()
+        
+        
+        Beta <- create_beta(phylo,
+                            type=chosen_var[1],
+                            fill=chosen_var[2], 
+                            shape=chosen_var[3]) +
+            scale_shape(solid=FALSE)
+    })
+    # Display beta-diversity
+    output$beta <- renderPlotly({
+        req(beta_div())
+        chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
+        ggplotly(beta_div()
+                 + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")),
+                 tooltip=c(chosen_var[1],
+                           chosen_var[2], 
+                           "NMDS1", 
+                           "NMDS2"))
+    })
+    
+    # Beta-diversity download
+    output$download_beta <- downloadHandler(
+        filename="biplot.pdf",
+        content=function(file){
+            pdf(file, width=12, height=10)
+            print(beta_div())
             dev.off()
         })
 }
