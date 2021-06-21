@@ -2,7 +2,7 @@
 
 ## About the program
 
-***Interomics*** is a application created to facilitate the visualization of metagenomic data. It is an user-friendly environment, where the user can easily: subset the data that is being calculated; select the variables that will be used to generate the plot, changing it instantly; visualize interactive plots – heatmap, biplot, alpha-diversity – where you can obtain information by hovering the mouse over the plot, zoom in or out, isolate or hide groups in the plot based on specific characteristics; generate a taxonomic tree.   
+***Interomics*** is a application created to facilitate the visualization of metagenomic data. It is an user-friendly environment, where the user can easily: subset the data that is being calculated; select the variables that will be used to generate the plot, changing it instantly; visualize interactive plots – heatmap, alpha-diversity, beta-diversity – where you can obtain information by hovering the mouse over the plot, zoom in or out, isolate or hide groups in the plot based on specific characteristics; generate a taxonomic tree.   
 
 ## Installation
 
