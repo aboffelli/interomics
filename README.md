@@ -109,13 +109,7 @@ In the *Taxonomic Tree* tab, you will find a slide bar where you can select the 
 
 To download the taxonomic tree in *pdf* format, click the button *Download*.  
 
-## Function
-
-### Biplot
-
-Both variables, color and shape, are required to create the *Biplot*. You can choose any combination of variables.
-
-The *Biplot* is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the selected variables and the positions NMDS1 and NMDS2. You can hide a group by clicking on the legend corresponding to that group in the right side, or isolate a group by double clicking in the legend corresponding to the group. In the top right corner of the plot you will find some command buttons, including: save the plot as a *png* image, selection box, zoom in and out, reset axes, etc. Click the button *Download* to download the original plot as *pdf* – any interactive change, such as zoom or hidden objects, will not be present.
+## Diversity
 
 ### Alpha-Diversity
 
@@ -124,3 +118,10 @@ Only the *X* variable and the *Measures* are required for the *Alpha-Diversity* 
 The slider can be used to trim the data for the alpha-diversity calculation. OTUs with the abundance equal to or lower than the number selected will be removed for the calculation.
 
 The *Alpha-Diversity* plot is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the selected variables and value of the measure selected. You can hide a group by clicking on the legend corresponding to that group in the right side, or isolate a group by double clicking in the legend corresponding to the group. In the top right corner of the plot you will find some command buttons, including: save the plot as a *png* image, selection box, zoom in and out, reset axes, etc. Click the button *Download* to download the original plot as *pdf* – any interactive change, such as zoom or hidden objects, will not be present.
+
+### Beta-Diversity
+
+All variables, type, color and shape, are required to create the *Beta-Diversity* plot. The type selection defines which variables can be chosen in the color and shape boxes. The type *taxa* will only allow variables from the Taxonomic table; the *sample* type will only allow Sample table variables; the *biplot* and *split* will allow all variables from both Taxonomic and Sample tables. The *biplot* and *split* are the same plot, however in the *split* option the samples and taxa are split to facilitate the analysis.
+
+The *Biplot* is interactive, which means that you can zoom in selecting an area inside the plot with the mouse, zoom out double clicking. Hovering the mouse over the plot gives you the information about the selected variables and the positions NMDS1 and NMDS2. You can hide a group by clicking on the legend corresponding to that group in the right side, or isolate a group by double clicking in the legend corresponding to the group. In the top right corner of the plot you will find some command buttons, including: save the plot as a *png* image, selection box, zoom in and out, reset axes, etc. Click the button *Download* to download the original plot as *pdf* – any interactive change, such as zoom or hidden objects, will not be present.
+
