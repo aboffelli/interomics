@@ -1,5 +1,6 @@
 
 ui <- fluidPage(
+  title="Interomics",
   # Application title in the top of the page
   fluidRow(
     wellPanel(
