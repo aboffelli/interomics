@@ -1,8 +1,7 @@
 
 ui <- fluidPage(
   # Application title in the top of the page
-  fluidRow(column(
-    6, offset = 3,
+  fluidRow(
     wellPanel(
       h1(strong("Interomics"), 
          align = "center", 
@@ -10,7 +9,7 @@ ui <- fluidPage(
       
       h2("An interactive application for metagenomic data"),
       align = 'center')
-    )),
+    ),
   
   # Main tabs of the page 
   tabsetPanel(
@@ -290,9 +289,9 @@ ui <- fluidPage(
       )
     )
   ),
+
   # print a line
-  column(12,
-         hr(),
+  fluidRow(wellPanel(
   # link to GitHub
   p(strong("Visit "),
     strong(
@@ -301,3 +300,4 @@ ui <- fluidPage(
     ),
     strong("for more information."))
   ))
+)
