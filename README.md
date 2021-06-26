@@ -43,9 +43,31 @@ BiocManager::install("phyloseq", ask=FALSE)
 
 
 
-### Running the program
+### Running the program 
 
-The program consists in three files – *ui.R*, *server.R*, and *global.R* – that must be stored together in the same directory.
+#### Directly from GitHub
+
+The easiest way to run the program is directly from GitHub from the R console with the following command.
+
+```r
+shiny::runGitHub("interomics", "aboffelli", ref="main")
+
+# Optionally, you can select the port that will be used for the server (4 number digit).
+shiny::runGitHub("interomics", "aboffelli", ref="main", port=xxxx)
+```
+
+The error **Error in utils::browseURL(appUrl) : 'browser' must be a non-empty character string** may happen in your console. This means that R cannot open the browser automatically. To solve this error change the code above to the one below.
+
+```R
+# Can also be used with the port selection
+shiny::runGitHub("interomics", "aboffelli", ref="main", launch.browser=FALSE)
+```
+
+This will prevent R from opening the browser automatically, just copy the URL that appears on the console and use it in your browser of preference.
+
+#### Downloading the files
+
+If you opt for download the files from GitHub, the program consists in three files – *ui.R*, *server.R*, and *global.R* – that must be stored together in the same directory.
 
 After the installation of the necessary packages and making sure that the three files – *ui.R*, *server.R*, and *global.R* – are together, you can run the program with the following line in the R console.
 
@@ -54,18 +76,11 @@ After the installation of the necessary packages and making sure that the three 
 # It must point to the whole directory containing the three files mentioned before. 
 shiny::runApp("C:/User/Example/Interomics")
 
-# Optionally, you can select the port that will be used for the server (4 number digit).
-shiny::runApp("C:/User/Example/Interomics", port=xxxx)
+# The options of port selection and not opening the browser automatically can also be used.
+shiny::runApp("C:/User/Example/Interomics", port=xxxx, launch.browser=FALSE)
 ```
 
-The error **Error in utils::browseURL(appUrl) : 'browser' must be a non-empty character string** may happen in your console. This means that R cannot open the browser automatically. To solve this error change the code above to the one below.
 
-```R
-# Can also be used with the port selection
-shiny::runApp("C:/User/Example/Interomics", launch.browser=FALSE)
-```
-
-This will prevent R from opening the browser automatically, just copy the URL that appears on the console and use it in your browser of preference.
 
 ## File Upload
 
