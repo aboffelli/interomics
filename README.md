@@ -96,17 +96,17 @@ It is possible to load an example dataset selecting the checkbox *Load an exampl
 
 The tables will be displayed in the right side, and updated according to the subset options, if activated. The tables are interactive, which means that you can: choose the number of entries to show, sort the rows based on the values of the column in ascending or descending order, search for an specific value.
 
-### Subsetting the data (optional)
+### Subset the data (optional)
 
 The subset will affect all the plots, with the exception of the *Taxonomic Tree*, that has its own filtering options.
 
-To subset the data, select the checkbox *Use subsetted data*. The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes. This checkbox can also be used to reset all the subset boxes, just by unchecking and checking again.
+To subset the data, select the checkbox *Use subset*. The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes. This checkbox can also be used to reset all the subset boxes, just by unchecking and checking again.
 
 First, select if the target group will be isolated or removed from the data, using the radio buttons – *Select*/*Remove* – above the set of three boxes that you will use. Choose whether the group is in the Taxa or Sample tables to unlock the options in the level box, according to the table chosen. In the level box, choose the taxonomic level/column where the target group is located. Finally, select the target group in the last box.
 
 Both options – select and remove – allow multiple target selection.
 
-You can download the subsetted tables, as tab delimited text files. The button *Download subsetted data* will download a tar file containing the three files.
+You can download the filtered tables, as tab delimited text files. The button *Download subsetted data* will download a tar file containing the three files.
 
 
 
