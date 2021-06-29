@@ -65,7 +65,7 @@ ui <- fluidPage(
           p(strong("Subset the data")),
           helpText("Use this option to filter the data. You can either isolate or remove the chosen groups."),
           helpText("All plots will be affected, except the Taxonomic Tree."),
-          checkboxInput("use_subset", "Use subsetted data", FALSE),
+          checkboxInput("use_subset", "Use subset", FALSE),
           br(),
           
           # Subset 1
