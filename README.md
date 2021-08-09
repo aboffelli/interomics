@@ -15,6 +15,8 @@ The program is written in R (4.0.3), and uses the following packages:
 - BiocManager 1.30.12
 - DT 0.18
 
+The file sessionInfo.txt contains all the packages and versions used in the the running session of the program.
+
 ### Installing packages
 
 #### Conda (recommended)
