@@ -1,7 +1,32 @@
+## -----------------------------------------------------------------------------
+##
+## Script name: global.R
+##
+## Author: Arthur Boffelli Castro
+##
+## Date created: 2021-05-05
+##
+## GitHub: https://github.com/aboffelli/interomics
+##
+## Description:
+##  Script responsible for creating the web template and all the features 
+##    displayed on the screen.
+##  
+## -----------------------------------------------------------------------------
+## 
+## Notes:
+##  This script is one of three scripts used to run Interomics (global.R, ui.R
+##    and server.R). The three scripts must be in the same directory to run the 
+##    program.
+##    
+## ----------------------------------------------------------------------------- 
 
+# Starts a web page.
 ui <- fluidPage(
+  # Name in the web browser tab.
   title="Interomics",
-  # Application title in the top of the page
+  
+  # Application title on the top of the page
   fluidRow(
     wellPanel(
       h1(strong("Interomics"), 
@@ -12,11 +37,17 @@ ui <- fluidPage(
       align = 'center')
     ),
   
-  # Main tabs of the page 
+  # Creates three separated tabs: File Upload, Abundance, and Diversity.
   tabsetPanel(
     id = "tabswitch",
     
-    tabPanel("File upload",
+################################################################################
+## File Upload tab
+## Initial tab containing the buttons to upload the tables and the options for 
+##  subsetting. The tables are displayed in the right side of the page, and 
+##  change automatically according to the subset.
+    
+    tabPanel("File Upload",
       value = "upload",
       sidebarLayout(
         sidebarPanel(
@@ -166,7 +197,9 @@ ui <- fluidPage(
       ),
     
 ###############################################################################
-    # Abundance tab containing Heatmap and taxonomic tree.
+## Abundance tab
+ 
+    # containing Heatmap and taxonomic tree.
     tabPanel("Abundance",
       value = "taxa",
       # Division between heatmap and tax tree

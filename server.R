@@ -1,3 +1,24 @@
+## -----------------------------------------------------------------------------
+##
+## Script name: global.R
+##
+## Author: Arthur Boffelli Castro
+##
+## Date created: 2021-05-05
+##
+## GitHub: https://github.com/aboffelli/interomics
+##
+## Description:
+##  TODO
+##  
+## -----------------------------------------------------------------------------
+## 
+## Notes:
+##  This script is one of three scripts used to run Interomics (global.R, ui.R
+##    and server.R), the three scripts must be in the same directory to run the 
+##    program. 
+## -----------------------------------------------------------------------------
+
 
 server <- function(input, output, session) {
     observeEvent(input$example, {
