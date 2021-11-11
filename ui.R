@@ -41,17 +41,17 @@ ui <- fluidPage(
   tabsetPanel(
     id = "tabswitch",
     
-################################################################################
+## -----------------------------------------------------------------------------
 ## File Upload tab
 ## Initial tab containing the buttons to upload the tables and the options for 
-##  subsetting. The tables are displayed in the right side of the page, and 
-##  change automatically according to the subset.
+##  subsetting. The tables are displayed in the right side of the page,
     
+    # Start the tab.
     tabPanel("File Upload",
       value = "upload",
       sidebarLayout(
         sidebarPanel(
-          # radio buttons for separator
+          # Create the radio buttons for separator
           radioButtons("sep",
                        "Separator",
                        choices = c(
@@ -60,7 +60,7 @@ ui <- fluidPage(
                          Semicolon = ";"),
                        selected = "\t"
           ),
-          
+          # Add three input boxes for the files.
           # OTU table input box
           fileInput(
             "otu",
@@ -88,23 +88,32 @@ ui <- fluidPage(
                        "text/comma-separated-values,text/plain")
           ),
           
-          # Checkbox that loads the example data
+          # Add checkbox that loads the example data
           checkboxInput("example", "Load an example dataset", FALSE),
           br(),
           
+          ## Subset area -------------------------------------------------------
           hr(),
+          # Add the title and a help message.
           p(strong("Subset the data")),
           helpText("Use this option to filter the data. You can either isolate or remove the chosen groups."),
           helpText("All plots will be affected, except the Taxonomic Tree."),
+          # Add a check box that will activate the subset.
           checkboxInput("use_subset", "Use subset", FALSE),
           br(),
           
-          # Subset 1
+          ## Subset boxes. Three separate boxes to allow more combinations.
+          
+          # First box for subset (this code will be repeated for the three 
+          #   options).
+          # Radio buttons to chose if the selection will be either selected or
+          #   removed from the table.
           radioButtons("subset_remove1",
                        label=NULL,
                        choices=c("Select",
                                  "Remove")),
-          
+          # The boxes containing the possible selections (Table, 
+          #   level, and group).
           div(style="display: inline-block; width: 32%",
               selectizeInput("subset_type1",
                           "Select the table",
@@ -122,7 +131,7 @@ ui <- fluidPage(
                           multiple=TRUE,
                           width="100%")),
           
-          # Subset 2
+          # Second box for subset
           radioButtons("subset_remove2",
                        label=NULL,
                        choices=c("Select",
@@ -144,7 +153,7 @@ ui <- fluidPage(
                           multiple=TRUE,
                           width="100%")),
           
-          # Subset 3
+          # Third box for subset
           radioButtons("subset_remove3",
                        label=NULL,
                        choices=c("Select",
@@ -166,49 +175,57 @@ ui <- fluidPage(
                           multiple=TRUE,
                           width="100%")),
           
+          # Add a button to download the tables after the subset.
           downloadButton("download_subset", "Download subsetted tables")
           ),
         
         
-        # Tables display
+        ## Tables display ------------------------------------------------------
+        # Add the area where the three tables will be displayed.
         mainPanel(fluidRow(
+          # OTU counts table.
           column(
             12,
             p(strong("OTU table")),
             div(style = "height:500px; overflow-y:scroll",
-                # Display the tables
+                # Area to display the table
                 DT::dataTableOutput("otu_table"))
           ),
+          # Taxonomy table.
           column(
             12,
             hr(),
             p(strong("Taxa table")),
             div(style = "height:500px; overflow-y:scroll",
+                # Area to display the table
                 DT::dataTableOutput("taxa_table"))
           ),
+          # Sample information table
           column(
             12,
             hr(),
             p(strong("Sample table")),
             div(style = "height:500px; overflow-y:scroll",
+                # Area to display the table
                 DT::dataTableOutput("sample_table"))
             ))
           ))
       ),
     
-###############################################################################
-## Abundance tab
+## -----------------------------------------------------------------------------
+## Abundance tab contains the Heatmap and the Taxonomy tree.
  
-    # containing Heatmap and taxonomic tree.
+    # Create the tab.
     tabPanel("Abundance",
       value = "taxa",
-      # Division between heatmap and tax tree
+      # Create a division between heatmap and tax tree
       navlistPanel(
         id="tax_tabs",
         widths = c(2, 10),
         
+        ## Heatmap -------------------------------------------------------------
         tabPanel("Heatmap",
-                 # Variable selection box
+                 # Create the selection box for the sample lable.
                  fluidRow(
                    column(3,
                           varSelectizeInput("sample_var", 
@@ -216,23 +233,30 @@ ui <- fluidPage(
                                          data=FALSE),
                           )
                    ),
+                 # Add a help message.
                  helpText("The selection is required to load the plot and defines the label under each sample."),
+                 # Add the download button.
                  downloadButton("download_heatmap"),
-                 # Heatmap display
+                 # Area to display the heatmap.
                  wellPanel(
                    plotlyOutput("heat_plot",
                                 height = "750px")
                  )),
         
+        ## Taxonomy tree -------------------------------------------------------
         tabPanel("Taxonomic tree",
+                 # Create the slider to choose the minimum abundance
                  fluidRow(
                    column(12,
+                   # Add the slider set to zero.
                    sliderInput("abundance_filter", 
                                "Select the minimum abundance to display", 
                                min=0, 
                                max=100, 
                                value=0, 
                                width='100%')),
+                   # Add the two boxes to filter the table. One for the 
+                   #  taxonomic level and one for the targeted group.
                    column(2,
                           varSelectizeInput("taxa_filter_level", 
                                       "Select the level to filter", 
@@ -243,17 +267,25 @@ ui <- fluidPage(
                                       data=character(0)))
                    
                    ),
+                 # Add the button to create the tree, since the tree creation
+                 #  takes some time, it will only run after clicking this 
+                 #  button.
                  actionButton("make_tree", "Create tree"),
+                 # Add the download button.
                  downloadButton("download_tree"),
+                 # Add a help message.
                  helpText("You can choose any level to filter, however the filtering is optional. 
                           To create the tree, click in the button above. The image may take some time to be created."),
                  wellPanel(
+                   # Area to display the tree.
                    plotOutput("tax_tree",
                               height="1500px")
                    ))
         )),
     
-###############################################################################
+## -----------------------------------------------------------------------------
+## Diversity tab.
+
     # Function tab containing Biplot and Alpha Diversity plots
     tabPanel("Diversity",
       value = "graph",
