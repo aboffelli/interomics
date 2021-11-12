@@ -96,7 +96,8 @@ ui <- fluidPage(
           hr(),
           # Add the title and a help message.
           p(strong("Subset the data")),
-          helpText("Use this option to filter the data. You can either isolate or remove the chosen groups."),
+          helpText("Use this option to filter the data. You can either isolate 
+                   or remove the chosen groups."),
           helpText("All plots will be affected, except the Taxonomic Tree."),
           # Add a check box that will activate the subset.
           checkboxInput("use_subset", "Use subset", FALSE),
@@ -234,7 +235,8 @@ ui <- fluidPage(
                           )
                    ),
                  # Add a help message.
-                 helpText("The selection is required to load the plot and defines the label under each sample."),
+                 helpText("The selection is required to load the plot and 
+                          defines the label under each sample."),
                  # Add the download button.
                  downloadButton("download_heatmap"),
                  # Area to display the heatmap.
@@ -274,8 +276,10 @@ ui <- fluidPage(
                  # Add the download button.
                  downloadButton("download_tree"),
                  # Add a help message.
-                 helpText("You can choose any level to filter, however the filtering is optional. 
-                          To create the tree, click in the button above. The image may take some time to be created."),
+                 helpText("You can choose any level to filter, however the 
+                 filtering is optional. 
+                          To create the tree, click in the button above. The 
+                          image may take some time to be created."),
                  wellPanel(
                    # Area to display the tree.
                    plotOutput("tax_tree",
@@ -284,30 +288,35 @@ ui <- fluidPage(
         )),
     
 ## -----------------------------------------------------------------------------
-## Diversity tab.
+## Diversity tab, contains the Alpha-diversity and Beta-diversity plots.
 
-    # Function tab containing Biplot and Alpha Diversity plots
+    # Create the tab
     tabPanel("Diversity",
       value = "graph",
-      # Division between Biplot and Alpha
+      # Create the division between alpha- and beta-diversity
       navlistPanel(
         widths = c(2, 10),
         
+        ## Alpha-diversity -----------------------------------------------------
         tabPanel("Alpha-Diversity",
-                 # Variables selection
+                 # Add all the boxes for the variables selection
                  fluidRow(
+                   # X variable selection box.
                    column(2,
                           varSelectizeInput("alpha_x_var", 
                                             "Select the x variable", 
                                             data=character(0))),
+                   # Color variable selection box.
                    column(2,
                           varSelectizeInput("alpha_col_var",
                                             "Select the color variable",
                                             data=character(0))),
+                   # Shape variable selection box.
                    column(2,
                           varSelectizeInput("alpha_shape_var",
                                             "Select the shape variable",
                                             data=character(0))),
+                   # Measure selection box.
                    column(2,
                           selectizeInput("alpha_measure_var", 
                                          "Select the measures used",
@@ -315,6 +324,8 @@ ui <- fluidPage(
                                                    "Shannon", "Simpson",
                                                    "InvSimpson", "Fisher"),
                                          multiple=TRUE)),
+                   # Add the slider to trim the data based on the abundance 
+                   #  number.
                    column(4,
                           sliderInput("alpha_slider",
                                       "Trim the data",
@@ -323,42 +334,54 @@ ui <- fluidPage(
                                       value=0,
                                       width='100%'))
                  ),
-                 helpText("The X variable and the measure are required. More then one measure can be selected at the same time.
-                            OTUs with the abundance equal to or below the number chosen in the slider will be removed."),
+                 # Add a help message explaining which variables are required 
+                 #  and which ones are optional.
+                 helpText("The X variable and the measure are required. More 
+                 then one measure can be selected at the same time.
+                            OTUs with the abundance equal to or below the number
+                          chosen in the slider will be removed."),
+                 # Add a download button
                  downloadButton("download_alpha"),
                  
-                 # Plot display
+                 # Area to plot the plot.
                  wellPanel(plotlyOutput("alpha",
                                         height = "750px"))),
         
+        ## Beta-diversity ------------------------------------------------------
         tabPanel("Beta-Diversity",
-                 # Variable selection boxes
+                 # Add all the boxes for the variables selection
                  fluidRow(
+                   # Type of plot selection box.
                    column(2,
                           selectizeInput("type_var", 
                                          "Select the type", 
                                          choices=character(0))),
+                   # Color variable selection box.
                    column(2,
                           varSelectizeInput("fill_var", 
                                          "Select the color variable", 
                                          data=character(0))),
+                   # Shape variable selection box.
                    column(2,
                           varSelectizeInput('shape_var', 
                                          "Select the shape variable", 
                                          data=character(0)))
                  ),
-                 helpText("All variables, type, color and shape, are required to load the plot."),
+                 # Add explaining that all variables are required to load
+                 helpText("All variables, type, color and shape, are required 
+                          to load the plot."),
+                 # Add a download button
                  downloadButton("download_beta"),
-                 # Plot display
+                 # Area to display the plot
                  wellPanel(plotlyOutput("beta",
                                         height = "750px")))
       )
     )
   ),
 
-  # print a line
+  # Add a line in the bottom of the page
   fluidRow(wellPanel(
-  # link to GitHub
+  # Add link to GitHub
   p(strong("Visit "),
     strong(
       a(href = "https://github.com/aboffelli/interomics",
