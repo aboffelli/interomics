@@ -558,7 +558,7 @@ server <- function(input, output, session) {
                                    measures=input$alpha_measure_var)
     })
     
-    # Display the alpha-diversity plot in the screen.
+    # Display the alpha-diversity plot on the screen.
     output$alpha <- renderPlotly({
         # Only runs if the alpha plot object exists.
         req(alpha_div())
@@ -577,7 +577,7 @@ server <- function(input, output, session) {
             shape <- toString(input$alpha_shape_var)
         }
         
-        # Display plot in the screen.
+        # Display plot on the screen.
         ggplotly(alpha_div() 
                  + theme(plot.margin = unit(c(1, 1, 1, 1.5), "cm")),
                  tooltip=c(x, col, shape, "value")
@@ -595,11 +595,17 @@ server <- function(input, output, session) {
     
     ## Beta-diversity
     
-    # Beta selection boxes update
+    # Populate the boxes according to the type of plot chosen.
     observeEvent(input$type_var, {
+        # Only run if the type variable box was changed.
         req(input$type_var)
+        
+        # Retrieve the selected type
         type <- input$type_var
         if(type %in% c("biplot", "split")) {
+            # If the type is Biplot or Split, the all the columns of the taxa
+            # table and sample table will be available in the color and shape 
+            # boxes.
             x <- matrix(ncol=sum(ncol(taxa_df()),ncol(sample_df())), nrow=0)
             colnames(x) <- c(colnames(taxa_df()), colnames(sample_df()))
             for (var in c("fill_var", "shape_var")) {
@@ -608,6 +614,8 @@ server <- function(input, output, session) {
                                         data = x, selected=character(0))
             }}
         else if(type == "taxa") {
+            # If the type is Taxa , only the column names from the taxa table
+            # will be available in the color and shape boxes.
             for(var in c("fill_var", "shape_var")) {
                 print(var)
                 updateVarSelectizeInput(session,
@@ -616,6 +624,8 @@ server <- function(input, output, session) {
                                         selected=character(0))  
             }}
         else {
+            # If the type is Sample, only the columns from the samples table 
+            # will be available in the color and shape boxes.
             for (var in c("fill_var", "shape_var")) {
                 updateVarSelectizeInput(session,
                                         var, 
@@ -625,25 +635,34 @@ server <- function(input, output, session) {
             
     })
     
-    # Beta-diversity object
+    # Create the Beta-diversity object
     beta_div <- reactive({
-        # only works after selecting fill and shape
+        # Only runs after selecting fill and shape in the selection boxes.
         req(input$fill_var, input$shape_var)
-        chosen_var <- c(toString(input$type_var), toString(input$fill_var), toString(input$shape_var))
+        
+        # Store the three choices in a vector
+        chosen_var <- c(toString(input$type_var), toString(input$fill_var), 
+                        toString(input$shape_var))
         
         phylo <- phylo()
         
-        
+        # Create the beta object.
         Beta <- create_beta(phylo,
                             type=chosen_var[1],
                             fill=chosen_var[2], 
                             shape=chosen_var[3]) +
             scale_shape(solid=FALSE)
     })
-    # Display beta-diversity
+    
+    # Display the beta-diversity on the screen
     output$beta <- renderPlotly({
+        # Only run if the beta object exists.
         req(beta_div())
+        # Reassign the selections again for the hovering information on the 
+        # plot.
         chosen_var <- c(toString(input$fill_var), toString(input$shape_var))
+        
+        # Display the Beta-diversity plot on the screen.
         ggplotly(beta_div()
                  + theme(plot.margin = unit(c(1, 1, 1, 1), "cm")),
                  tooltip=c(chosen_var[1],
@@ -652,7 +671,7 @@ server <- function(input, output, session) {
                            "NMDS2"))
     })
     
-    # Beta-diversity download
+    # Activate the download button for the Beta-diversity plot.
     output$download_beta <- downloadHandler(
         filename="biplot.pdf",
         content=function(file){
