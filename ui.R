@@ -51,6 +51,14 @@ ui <- fluidPage(
       value = "upload",
       sidebarLayout(
         sidebarPanel(
+          
+          p(strong("Load an example dataset.")),
+          # Add checkbox that loads the example data
+          checkboxInput("example", "Example dataset", FALSE),
+          # Add a separator line
+          hr(style = "border-top: 1px solid #000000;"),
+          
+          p(strong("Upload your own files.")),
           # Create the radio buttons for separator
           radioButtons("sep",
                        "Separator",
@@ -60,11 +68,12 @@ ui <- fluidPage(
                          Semicolon = ";"),
                        selected = "\t"
           ),
+         
           # Add three input boxes for the files.
           # OTU table input box
           fileInput(
             "otu",
-            "Choose a OTU counts table file",
+            "Choose an OTU counts table file",
             multiple = FALSE,
             accept = c("text/csv", ".csv", ".tab", ".tsv", 
                        "text/comma-separated-values,text/plain")
@@ -87,13 +96,9 @@ ui <- fluidPage(
             accept = c("text/csv", ".csv", 
                        "text/comma-separated-values,text/plain")
           ),
-          
-          # Add checkbox that loads the example data
-          checkboxInput("example", "Load an example dataset", FALSE),
-          br(),
-          
+
           ## Subset area -------------------------------------------------------
-          hr(),
+          hr(style = "border-top: 1px solid #000000;"),
           # Add the title and a help message.
           p(strong("Subset the data")),
           helpText("Use this option to filter the data. You can either isolate 
