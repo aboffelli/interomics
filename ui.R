@@ -19,7 +19,7 @@
 ##    and server.R). The three scripts must be in the same directory to run the 
 ##    program.
 ##    
-## ----------------------------------------------------------------------------- 
+## -----------------------------------------------------------------------------
 
 # Starts a web page.
 ui <- fluidPage(
@@ -103,7 +103,7 @@ ui <- fluidPage(
           p(strong("Subset the data")),
           helpText("Use this option to filter the data. You can either isolate 
                    or remove the chosen groups."),
-          helpText("All plots will be affected, except the Taxonomic Tree."),
+          helpText("All plots will be affected."),
           # Add a check box that will activate the subset.
           checkboxInput("use_subset", "Use subset", FALSE),
           br(),
@@ -339,12 +339,14 @@ ui <- fluidPage(
                                       value=0,
                                       width='100%'))
                  ),
-                 # Add a help message explaining which variables are required 
-                 #  and which ones are optional.
-                 helpText("The X variable and the measure are required. More 
-                 then one measure can be selected at the same time.
-                            OTUs with the abundance equal to or below the number
-                          chosen in the slider will be removed."),
+                 # Add a help message explaining what the alpha-diversity shows 
+                 # and which variables are required or optional.
+                 helpText("The Alpha-diversity shows the diversity of organisms
+                 within the samples."),
+                 helpText("In order to generate the plot, the X variable and the 
+                 measure are required. More then one measure can be selected at 
+                 the same time. OTUs with the abundance equal to or below the 
+                 number chosen in the slider will be removed."),
                  # Add a download button
                  downloadButton("download_alpha"),
                  
@@ -372,7 +374,10 @@ ui <- fluidPage(
                                          "Select the shape variable", 
                                          data=character(0)))
                  ),
-                 # Add explaining that all variables are required to load
+                 # Add explaining the beta-diversity plot and that all variables
+                 #  are required to load
+                 helpText("The Beta-diversity shows the difference of diversity
+                          between samples."),
                  helpText("All variables, type, color and shape, are required 
                           to load the plot."),
                  # Add a download button

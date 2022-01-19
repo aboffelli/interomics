@@ -18,8 +18,7 @@
 ##    and server.R), the three scripts must be in the same directory to run the 
 ##    program.
 ##  
-## ----------------------------------------------------------------------------- 
-
+## -----------------------------------------------------------------------------
 
 # Load all packages needed.
 library(shiny)
@@ -40,6 +39,7 @@ create_phylo <- function(taxa, otu, sample) {
     ##  taxonomic classification, OTU counts, and sample information, 
     ##  respectively.
     ## -------------------------------------------------------------------------
+    
     OTU <- otu_table(otu, taxa_are_rows=TRUE)
     TAXA <- tax_table(taxa)
     SAMPLE <- sample_data(sample)

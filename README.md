@@ -106,7 +106,7 @@ The tables will be displayed in the right side, and updated according to the sub
 
 ### Subset the data (optional)
 
-The subset will affect all the plots, with the exception of the *Taxonomic Tree*, that has its own filtering options.
+The subset affects all the plots.
 
 To subset the data, select the checkbox ***Use subset***. The program will not use the filtered data if this checkbox is not selected, even if you chose the groups in the boxes. This checkbox can also be used to reset all the subset boxes, just by unchecking and checking again.
 

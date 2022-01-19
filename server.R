@@ -460,7 +460,7 @@ server <- function(input, output, session) {
             # Update the second box according to the selection on the first box.
             updateSelectizeInput(session,
                               "taxa_filter_selection",
-                              choices=unique(taxa_df()[,level]),
+                              choices=unique(tax_table(phylo())[,level]),
                               selected=character(0))
             }
     })
@@ -474,19 +474,19 @@ server <- function(input, output, session) {
         filter_num <- input$abundance_filter
         
         # Create the taxmap using the metacoder package.
-        taxmap <- create_taxmap(taxa=taxa_df(), 
-                                otu=otu_df())
+        taxmap <- create_taxmap(taxa=tax_table(phylo()), 
+                                otu=otu_table(phylo()))
         # Check if the filter is selected and filter the taxmap using only the
         # levels below the selected.
         if(!is.null(input$taxa_filter_selection)){
-            taxmap <- taxa::filter_taxa(taxmap,
+            taxmap <- metacoder::filter_taxa(taxmap,
                                         taxon_names==toString(
                                             input$taxa_filter_selection),
                                         subtaxa=TRUE)
         }
         
         # Keep only the organisms with a minimum abundance set by the slider.
-        taxmap <- taxa::filter_taxa(taxmap, n_obs>=filter_num)
+        taxmap <- metacoder::filter_taxa(taxmap, n_obs>=filter_num)
         
         # Create the tree object.
         heat_tree(taxmap,
